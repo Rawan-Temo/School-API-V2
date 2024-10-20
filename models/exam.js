@@ -45,6 +45,5 @@ examSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });
-
 const Exam = mongoose.model("Exam", examSchema);
 module.exports = Exam;
