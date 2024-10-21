@@ -17,6 +17,7 @@ const examResultsRouter = require("./routes/examResultRouter.js");
 const timeTableRouter = require("./routes/timeTableRouter.js");
 const adminRouter = require("./routes/adminRouter.js");
 const userRouter = require("./routes/userRouter.js");
+const quizRouter = require("./routes/quizRouter.js");
 // Import and initialize database connection
 const connection = require("./db.js");
 connection();
@@ -37,6 +38,7 @@ app.use("/api/attendances", attendanceRouter);
 app.use("/api/exams", examRouter);
 app.use("/api/exam-results", examResultsRouter);
 app.use("/api/time-table", timeTableRouter);
+app.use("/api/quizzes", quizRouter);
 app.use("/api/admins", adminRouter);
 app.use("/api/users", userRouter);
 app.use((req, res, next) => {
