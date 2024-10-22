@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const mongoose_fuzzy_searching = require("mongoose-fuzzy-searching");
 const subjectSchema = new mongoose.Schema(
   {
     name: {
@@ -31,6 +31,10 @@ subjectSchema.index(
   { code: 1 },
   { unique: true, partialFilterExpression: { active: true } }
 );
+subjectSchema.index({ name: "text", description: "text" });
+subjectSchema.plugin(mongoose_fuzzy_searching, {
+  fields: ["name", "description"],
+});
 const Subject = mongoose.model("Subject", subjectSchema);
 
 module.exports = Subject;

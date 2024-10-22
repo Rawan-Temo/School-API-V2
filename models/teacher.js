@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongoose_fuzzy_searching = require("mongoose-fuzzy-searching");
 
 const teacherSchema = new mongoose.Schema({
   firstName: {
@@ -68,6 +69,10 @@ teacherSchema.index(
   { email: 1 },
   { unique: true, partialFilterExpression: { active: true } }
 );
+teacherSchema.index({ firstName: "text", lastName: "text" });
+teacherSchema.plugin(mongoose_fuzzy_searching, {
+  fields: ["firstName", "middleName", "lastName"],
+});
 const Teacher = mongoose.model("Teacher", teacherSchema);
 
 module.exports = Teacher;

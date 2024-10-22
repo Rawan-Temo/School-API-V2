@@ -1,8 +1,5 @@
-const Attendance = require("../models/attendance");
-const Exam = require("../models/exam");
 const Subject = require("../models/subject");
 const Teacher = require("../models/teacher");
-const Timetable = require("../models/timeTable");
 const apiFeatures = require("../utils/apiFeatures");
 // Get all subjects
 const AllSubjects = async (req, res) => {
@@ -174,6 +171,56 @@ const countData = async (req, res) => {
     res.status(400).json({ status: "fail", message: error.message });
   }
 };
+const search = async (req, res) => {
+  // Extract search parameters
+  const searchText = req.params.id || "";
+
+  try {
+    // Create a regex pattern that matches if any part of the word is present
+    const regex = new RegExp(searchText.split("").join(".*"), "i");
+
+    // Query the database with the regex pattern
+    let features = new apiFeatures(
+      Subject.find({
+        $or: [{ name: regex }, { description: regex }],
+      }),
+      req.query
+    )
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    let results = await features.query;
+    if (results.length < 1) {
+      // Create a new apiFeatures instance for the fuzzy search
+      features = new apiFeatures(
+        Subject.fuzzySearch(searchText), // Adjust this to match your fuzzy search implementation
+        req.query
+      )
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+
+      results = await features.query;
+    }
+
+    // Return the results
+    res.status(200).json({
+      status: "success",
+      results: results.length,
+      data: results,
+    });
+  } catch (error) {
+    // Log the error for server debugging
+    console.error("Error performing search:", error);
+
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   AllSubjects,
   addSubject,
@@ -181,4 +228,5 @@ module.exports = {
   updateSubject,
   deactivateSubject,
   countData,
+  search,
 };

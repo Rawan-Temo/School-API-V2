@@ -11,6 +11,7 @@ router
   .get(studentController.getAllStudents)
   .post(studentController.addStudent);
 // router.route("/delete/:id").delete(studentController.deleteStudentFinally);
+router.get("/search/:id", studentController.search);
 router.route("/deactivate/:id").patch(studentController.deactivateStudent);
 router.route("/increment-year/:id").patch(studentController.incrementYear);
 router

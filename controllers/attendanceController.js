@@ -42,7 +42,7 @@ const getAttendance = async (req, res) => {
 };
 const timeResults = async (req, res) => {
   try {
-    const { startDate, endDate, studentId } = req.query;
+    const { startDate, endDate, studentId, classId } = req.query;
     let filter = {};
 
     // Add date range filtering if startDate or endDate is provided
@@ -57,6 +57,9 @@ const timeResults = async (req, res) => {
     }
     if (studentId) {
       filter.studentId = studentId;
+    }
+    if (classId) {
+      filter.classId = classId;
     }
     filter.active = true;
 

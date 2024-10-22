@@ -310,6 +310,53 @@ const countGender = async (req, res) => {
     res.status(400).json({ status: "fail", message: error.message });
   }
 };
+const search = async (req, res) => {
+  try {
+    // Extract search parameters
+    const searchText = req.params.id || "";
+    const regex = new RegExp(searchText.split("").join(".*"), "i");
+    let features = new apiFeatures(
+      Teacher.find({
+        $or: [{ firstName: regex }, { middleName: regex }, { lastName: regex }],
+      })
+        .populate("subjects")
+        .populate("classes"),
+      req.query
+    )
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    let results = await features.query;
+    if (results.length < 1) {
+      features = new apiFeatures(
+        Teacher.fuzzySearch(searchText)
+          .populate("subjects")
+          .populate("classes"), // Adjust this to match your fuzzy search implementation
+        req.query
+      )
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate();
+      results = await features.query;
+    }
+    // Return the results
+    res.status(200).json({
+      status: "success",
+      results: results.length,
+      data: results,
+    });
+  } catch (error) {
+    // Log the error for server debugging
+    console.error("Error performing search:", error);
+
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   getAllTeachers,
   addTeacher,
@@ -320,4 +367,5 @@ module.exports = {
   deActivateManyTeachers,
   countData,
   countGender,
+  search,
 };

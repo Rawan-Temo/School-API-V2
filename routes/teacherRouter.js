@@ -11,6 +11,7 @@ router
   .get(teacherController.getAllTeachers)
   .post(teacherController.addTeacher);
 // router.route("/delete/:id").delete(teacherController.deActivateManyTeachers);
+router.get("/search/:id", teacherController.search);
 router.route("/deactivate/:id").patch(teacherController.deactivateTeacher);
 router
   .route("/:id")

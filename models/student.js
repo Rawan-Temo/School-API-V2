@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const mongoose_fuzzy_searching = require("mongoose-fuzzy-searching");
 
 const studentSchema = new mongoose.Schema({
   firstName: {
@@ -109,6 +110,9 @@ studentSchema.pre("save", function (next) {
 
 // Optional: Add compound index for common query patterns
 studentSchema.index({ active: 1, yearLevel: 1, classId: 1 }); // Example of a compound index on yearLevel and class
-
+studentSchema.index({ firstName: "text", lastName: "text" });
+studentSchema.plugin(mongoose_fuzzy_searching, {
+  fields: ["firstName", "middleName", "lastName"],
+});
 const Student = mongoose.model("Student", studentSchema);
 module.exports = Student;

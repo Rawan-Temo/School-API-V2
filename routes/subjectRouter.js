@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const subjectController = require("../controllers/subjectController.js");
+router.get("/search/:id", subjectController.search);
 router.get("/count", subjectController.countData);
 
 router
