@@ -49,10 +49,9 @@ const timeResults = async (req, res) => {
     if (startDate || endDate) {
       filter.date = {};
       if (startDate) {
-        filter.date.$gte = new Date(startDate);
-      }
-      if (endDate) {
-        filter.date.$lte = new Date(endDate);
+        const [year, month] = startDate.split("-").map(Number);
+        filter.date.$gte = new Date(year, month - 1, 1); // Start of the month
+        filter.date.$lte = new Date(year, month, 0); // End of the month
       }
     }
     if (studentId) {
