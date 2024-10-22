@@ -63,7 +63,15 @@ const timeResults = async (req, res) => {
     filter.active = true;
 
     // Query the TimeTable model with the filter
-    const timeResults = await Attendance.find(filter);
+    const timeResults = await Attendance.find(filter)
+      .populate({
+        path: "studentId",
+        select: "firstName middleName lastName _id", // Specify the fields to populate
+      })
+      .populate({
+        path: "classId",
+        select: "name _id yearLevel", // Include _id if you want it from classId as well
+      });
 
     res.status(200).json({
       status: "success",
