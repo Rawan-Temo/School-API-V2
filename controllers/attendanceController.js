@@ -42,36 +42,27 @@ const getAttendance = async (req, res) => {
 };
 const timeResults = async (req, res) => {
   try {
-    const { startDate, endDate, studentId, classId } = req.query;
+    const { month, studentId, classId } = req.query;
     let filter = {};
 
-    // Add date range filtering if startDate or endDate is provided
-    if (startDate || endDate) {
-      filter.date = {};
-      if (startDate) {
-        const [year, month] = startDate.split("-").map(Number);
-        filter.date.$gte = new Date(year, month - 1, 1); // Start of the month
-        filter.date.$lte = new Date(year, month, 0); // End of the month
-      }
-    }
-    if (studentId) {
-      filter.studentId = studentId;
-    }
-    if (classId) {
-      filter.classId = classId;
-    }
-    filter.active = true;
+    if (month) {
+      // Parse the month parameter in "YYYY-MM" format
+      const [year, monthNumber] = month.split("-").map(Number);
 
-    // Query the TimeTable model with the filter
-    const timeResults = await Attendance.find(filter)
-      .populate({
-        path: "studentId",
-        select: "firstName middleName lastName _id", // Specify the fields to populate
-      })
-      .populate({
-        path: "classId",
-        select: "name _id yearLevel", // Include _id if you want it from classId as well
-      });
+      // Filter for the start and end of the given month
+      filter.date = {
+        $gte: new Date(year, monthNumber - 1, 1), // Start of the month (1st day)
+        $lt: new Date(year, monthNumber, 1), // Start of the next month
+      };
+    }
+
+    // Use aggregate to group by studentId
+    const features = new apiFeatures(Attendance.find(filter), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const timeResults = await features.query;
 
     res.status(200).json({
       status: "success",
