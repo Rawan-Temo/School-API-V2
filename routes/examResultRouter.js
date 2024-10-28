@@ -7,6 +7,7 @@ router
   .route("/")
   .get(examResultController.allResults)
   .post(examResultController.addResult);
+router.get("/search/:id", examResultController.search);
 
 router.route("/deactivate/:id").patch(examResultController.deactivateResult);
 router

@@ -187,7 +187,7 @@ const incrementYear = async (req, res) => {
 
     if (repeatedYear) {
       // Step 3: If it exists, increment the yearCount by the provided incrementCount
-      repeatedYear.yearCount += incrementCount;
+      repeatedYear.yearCount = incrementCount;
     } else {
       // Step 4: If it does not exist, add a new entry with yearLevel and yearCount
       student.yearRepeated.push({

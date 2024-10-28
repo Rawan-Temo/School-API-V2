@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
 const examSchema = new mongoose.Schema({
+  title: {
+    type: String,
+  },
   subjectId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Subject", // Reference to the Subject model

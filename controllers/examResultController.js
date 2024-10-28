@@ -1,6 +1,7 @@
 const ExamResult = require("../models/examResult");
 const Exam = require("../models/exam");
 const apiFeatures = require("../utils/apiFeatures");
+const Student = require("../models/student.js");
 // Get all exam results with pagination, sorting, and filtering
 const allResults = async (req, res) => {
   try {
@@ -50,7 +51,25 @@ const addResult = async (req, res) => {
   try {
     const { student, exam, score, date } = req.body;
 
-    // Check if the exam result already exists
+    // Check if the exam exists
+    const targetExam = await Exam.findById(exam);
+    if (!targetExam) {
+      return res.status(404).json({
+        status: "fail",
+        message: "The specified exam does not exist.",
+      });
+    }
+
+    // Validate score against total marks
+    const totalMarks = targetExam.totalMarks;
+    if (score > totalMarks) {
+      return res.status(400).json({
+        status: "fail",
+        message: `Score cannot exceed the total marks of ${totalMarks}.`,
+      });
+    }
+
+    // Check if the student already has a result for this exam
     const existingResult = await ExamResult.findOne({
       student,
       exam,
@@ -63,26 +82,37 @@ const addResult = async (req, res) => {
         message: "This student already has a result for this exam.",
       });
     }
-    const teagetExam = await Exam.findById(exam);
-    const totalMarks = teagetExam.totalMarks;
 
-    if (score > totalMarks) {
-      res.status(400).json({
+    // Fetch student data to get the name for denormalization
+    const studentData = await Student.findById(student);
+    if (!studentData) {
+      return res.status(404).json({
         status: "fail",
-        message: "cannot pass the marks limit",
-      });
-    } else {
-      // Create a new exam result if no duplicate found
-      const newExamResult = new ExamResult({ student, exam, score, date });
-      await newExamResult.save();
-
-      res.status(201).json({
-        status: "success",
-        data: newExamResult,
+        message: "The specified student does not exist.",
       });
     }
+
+    // Create a new exam result with studentName
+    const newExamResult = new ExamResult({
+      student,
+      exam,
+      score,
+      date,
+      studentName: `${studentData.firstName} ${studentData.lastName}`, // Denormalized field
+    });
+
+    // Save the new exam result
+    await newExamResult.save();
+
+    res.status(201).json({
+      status: "success",
+      data: newExamResult,
+    });
   } catch (error) {
-    res.status(400).json({ status: "fail", message: error.message });
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
   }
 };
 /// Update a specific exam result by ID
@@ -92,7 +122,6 @@ const updateResult = async (req, res) => {
 
     // Fetch the existing exam result first
     const existingResult = await ExamResult.findById(resultId).populate("exam");
-
     if (!existingResult) {
       return res.status(404).json({
         status: "fail",
@@ -115,6 +144,20 @@ const updateResult = async (req, res) => {
     }
 
     // Update the exam result, ensuring the exam ID is preserved
+    if (req.body.student) {
+      // Check if the student already has a result for this exam
+      const studentData = await Student.findOne({ _id: req.body.student });
+      console.log(studentData);
+
+      if (!studentData) {
+        return res
+          .status(400)
+          .json({ status: "fail", message: "student not found" });
+      }
+      req.body.studentName = `${studentData.firstName} ${studentData.lastName}`;
+    }
+    console.log(req.body);
+
     const updatedResult = await ExamResult.findByIdAndUpdate(
       resultId,
       req.body,
@@ -207,6 +250,33 @@ const countData = async (req, res) => {
     res.status(400).json({ status: "fail", message: error.message });
   }
 };
+const search = async (req, res) => {
+  try {
+    const searchText = req.params.id || "";
+
+    // Use fuzzy search
+    const features = new apiFeatures(
+      ExamResult.fuzzySearch(searchText).populate("student exam"),
+      req.query
+    )
+      .sort()
+      .filter()
+      .limitFields()
+      .paginate();
+    const results = await features.query;
+
+    res.status(200).json({
+      status: "success",
+      results: results.length,
+      data: results,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   allResults,
   aResult,
@@ -215,4 +285,5 @@ module.exports = {
   deactivateResult,
   deactivateManyResults,
   countData,
+  search,
 };
