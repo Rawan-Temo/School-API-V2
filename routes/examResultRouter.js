@@ -3,6 +3,7 @@ const router = express.Router();
 const examResultController = require("../controllers/examResultController.js");
 router.get("/count", examResultController.countData);
 
+router.route("/details/:id").get(examResultController.detailedResults);
 router
   .route("/")
   .get(examResultController.allResults)

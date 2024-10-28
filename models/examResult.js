@@ -19,10 +19,6 @@ const examResultSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  date: {
-    type: Date,
-    required: true,
-  },
   active: {
     type: Boolean,
     default: true,

@@ -9,18 +9,10 @@ const timetableSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Subject", // Reference to the Subject model
   },
-  teacher: {
-    type: mongoose.Schema.Types.Mixed, // This allows for both ObjectId and string
-    ref: "Teacher", // Reference to Teacher model
-  },
   yearLevel: {
     type: Number,
     required: true,
     enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // Year levels from 1 to 12
-  },
-  date: {
-    type: Date,
-    required: true,
   },
   dayOfWeek: {
     type: String,
@@ -43,7 +35,7 @@ const timetableSchema = new mongoose.Schema({
 
 // Create a unique partial index on active timetables
 timetableSchema.index(
-  { class: 1, subject: 1, dayOfWeek: 1, startTime: 1, date: 1 },
+  { class: 1, subject: 1, dayOfWeek: 1, startTime: 1 },
   { unique: true, partialFilterExpression: { active: true } }
 );
 

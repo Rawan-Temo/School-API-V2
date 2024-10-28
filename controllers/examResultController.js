@@ -2,6 +2,7 @@ const ExamResult = require("../models/examResult");
 const Exam = require("../models/exam");
 const apiFeatures = require("../utils/apiFeatures");
 const Student = require("../models/student.js");
+const mongoose = require("mongoose");
 // Get all exam results with pagination, sorting, and filtering
 const allResults = async (req, res) => {
   try {
@@ -277,6 +278,69 @@ const search = async (req, res) => {
     });
   }
 };
+const detailedResults = async (req, res) => {
+  try {
+    const studentId = req.params.id;
+
+    // Check if the student exists
+    const studentExists = await Student.findById(studentId);
+    if (!studentExists) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Student not found.",
+      });
+    }
+
+    // Aggregate the exam results for the specified student, grouped by subject
+    const results = await ExamResult.aggregate([
+      { $match: { student: mongoose.Types.ObjectId(studentId), active: true } }, // Filter by student ID and active results
+      {
+        $lookup: {
+          from: "exams", // Reference to the Exam collection
+          localField: "exam",
+          foreignField: "_id",
+          as: "examDetails",
+        },
+      },
+      { $unwind: "$examDetails" }, // Unwind the exam details array
+      {
+        $lookup: {
+          from: "subjects", // Reference to the Subject collection
+          localField: "examDetails.subjectId",
+          foreignField: "_id",
+          as: "subjectDetails",
+        },
+      },
+      { $unwind: "$subjectDetails" }, // Unwind the subject details array
+      {
+        $group: {
+          _id: "$subjectDetails.name", // Group by subject name
+          results: {
+            $push: {
+              examId: "$examDetails._id",
+              examTitle: "$examDetails.title",
+              date: "$date",
+              score: "$score",
+              totalMarks: "$examDetails.totalMarks",
+            },
+          },
+        },
+      },
+      { $sort: { _id: 1 } }, // Sort by subject name (optional)
+    ]);
+
+    res.status(200).json({
+      status: "success",
+      results: results.length,
+      data: results,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   allResults,
   aResult,
@@ -286,4 +350,5 @@ module.exports = {
   deactivateManyResults,
   countData,
   search,
+  detailedResults,
 };
