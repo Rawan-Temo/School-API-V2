@@ -19,6 +19,7 @@ const examResultSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+
   active: {
     type: Boolean,
     default: true,

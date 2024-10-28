@@ -319,11 +319,16 @@ const detailedResults = async (req, res) => {
             $push: {
               examId: "$examDetails._id",
               examTitle: "$examDetails.title",
-              date: "$date",
+              date: "$examDetails.date",
               score: "$score",
               totalMarks: "$examDetails.totalMarks",
             },
           },
+        },
+      },
+      {
+        $addFields: {
+          results: { $sortArray: { input: "$results", sortBy: { date: 1 } } }, // Sort results by date within each subject
         },
       },
       { $sort: { _id: 1 } }, // Sort by subject name (optional)
