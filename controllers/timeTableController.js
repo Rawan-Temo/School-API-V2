@@ -4,7 +4,10 @@ const apiFeatures = require("../utils/apiFeatures");
 const allTimeTables = async (req, res) => {
   try {
     // Initialize apiFeatures with the date filter
-    const features = new apiFeatures(TimeTable.find(), req.query)
+    const features = new apiFeatures(
+      TimeTable.find().populate("classId subjectId"),
+      req.query
+    )
       .sort()
       .filter()
       .limitFields()
