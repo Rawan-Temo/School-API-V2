@@ -9,6 +9,7 @@ router
   .get(subjectController.AllSubjects)
   .post(subjectController.addSubject);
 router.route("/deactivate/:id").patch(subjectController.deactivateSubject);
+router.route("/deactivateMany").patch(subjectController.deactivateManySubject);
 router
   .route("/:id")
   .get(subjectController.getASubject)

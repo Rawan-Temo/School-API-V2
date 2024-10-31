@@ -16,7 +16,15 @@ const timetableSchema = new mongoose.Schema({
   },
   dayOfWeek: {
     type: String,
-    enum: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], // Days of the week
+    enum: [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ], // Days of the week
     required: true,
   },
   startTime: {

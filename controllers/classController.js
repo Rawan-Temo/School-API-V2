@@ -1,10 +1,6 @@
 const ClassModel = require("../models/class");
-const Student = require("../models/student");
 const Teacher = require("../models/teacher");
 const apiFeatures = require("../utils/apiFeatures");
-const Attendance = require("../models/attendance.js");
-const Exam = require("../models/exam.js");
-const Timetable = require("../models/timeTable");
 const allClasses = async (req, res) => {
   try {
     const features = new apiFeatures(ClassModel.find(), req.query)
@@ -170,6 +166,40 @@ const countData = async (req, res) => {
     res.status(400).json({ status: "fail", message: error.message });
   }
 };
+const deactivateManyClasses = async (req, res) => {
+  try {
+    const classIds = req.body.Ids;
+
+    // Validate input
+    if (!Array.isArray(classIds) || classIds.length === 0) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Please provide an array of subject IDs.",
+      });
+    }
+
+    // Step 1: Soft delete the teachers by updating the 'active' status
+    const result = await ClassModel.updateMany(
+      { _id: { $in: classIds } },
+      { $set: { active: false } } // Set active to false for soft deletion
+    );
+
+    if (result.nModified === 0) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No subjects found or already deactivated.",
+      });
+    }
+
+    // Step 2: Return success response
+    res.status(200).json({
+      status: "success",
+      message: "subjects deactivated successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({ status: "fail", message: error.message });
+  }
+};
 module.exports = {
   allClasses,
   addClass,
@@ -177,4 +207,5 @@ module.exports = {
   updateClass,
   deactivateClass,
   countData,
+  deactivateManyClasses,
 };

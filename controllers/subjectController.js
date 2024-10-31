@@ -221,6 +221,40 @@ const search = async (req, res) => {
     });
   }
 };
+const deactivateManySubject = async (req, res) => {
+  try {
+    const subjectIds = req.body.Ids;
+
+    // Validate input
+    if (!Array.isArray(subjectIds) || subjectIds.length === 0) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Please provide an array of subject IDs.",
+      });
+    }
+
+    // Step 1: Soft delete the teachers by updating the 'active' status
+    const result = await Subject.updateMany(
+      { _id: { $in: subjectIds } },
+      { $set: { active: false } } // Set active to false for soft deletion
+    );
+
+    if (result.nModified === 0) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No subjects found or already deactivated.",
+      });
+    }
+
+    // Step 2: Return success response
+    res.status(200).json({
+      status: "success",
+      message: "subjects deactivated successfully.",
+    });
+  } catch (error) {
+    res.status(500).json({ status: "fail", message: error.message });
+  }
+};
 module.exports = {
   AllSubjects,
   addSubject,
@@ -229,4 +263,5 @@ module.exports = {
   deactivateSubject,
   countData,
   search,
+  deactivateManySubject,
 };

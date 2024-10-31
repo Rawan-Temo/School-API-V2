@@ -13,7 +13,6 @@ const examResultSchema = new mongoose.Schema({
   },
   studentName: {
     type: String, // Denormalized field for fuzzy search
-    required: true,
   },
   score: {
     type: Number,

@@ -9,6 +9,7 @@ router
   .post(classController.addClass);
 
 router.route("/deactivate/:id").patch(classController.deactivateClass);
+router.route("/deactivateMany").patch(classController.deactivateManyClasses);
 
 router
   .route("/:id")
