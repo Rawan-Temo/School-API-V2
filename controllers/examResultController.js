@@ -117,6 +117,7 @@ const addResult = async (req, res) => {
   }
 };
 /// Update a specific exam result by ID
+
 const updateResult = async (req, res) => {
   try {
     const resultId = req.params.id;
@@ -317,6 +318,7 @@ const detailedResults = async (req, res) => {
           _id: "$subjectDetails.name", // Group by subject name
           results: {
             $push: {
+              examResultId: "$_id",
               examId: "$examDetails._id",
               examTitle: "$examDetails.title",
               date: "$examDetails.date",
