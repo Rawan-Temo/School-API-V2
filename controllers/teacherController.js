@@ -76,7 +76,9 @@ const addTeacher = async (req, res) => {
 const getATeacher = async (req, res) => {
   try {
     const teacherId = req.params.id;
-    const teacher = await Teacher.findById(teacherId).populate("classes"); // Populate if you want class details
+    const teacher = await Teacher.findById(teacherId).populate(
+      "classes subjects"
+    ); // Populate if you want class details
 
     if (!teacher) {
       return res
