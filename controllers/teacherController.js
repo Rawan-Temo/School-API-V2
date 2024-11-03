@@ -72,7 +72,7 @@ const addTeacher = async (req, res) => {
   }
 };
 
-// Get a specific teacher by ID
+// Get a specific teacher by ID  
 const getATeacher = async (req, res) => {
   try {
     const teacherId = req.params.id;

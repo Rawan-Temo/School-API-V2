@@ -25,7 +25,10 @@ const allExams = async (req, res) => {
 const anExam = async (req, res) => {
   try {
     const examId = req.params.id;
-    const exam = await Exam.findById(examId);
+    const exam = await Exam.findById(examId).populate({
+      path: "classeId subjectId",
+      select: "name _id", // Include only 'name' and '_id' fields
+    });
 
     if (!exam) {
       return res
