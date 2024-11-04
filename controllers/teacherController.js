@@ -12,10 +12,23 @@ const getAllTeachers = async (req, res) => {
       .limitFields()
       .paginate();
 
+    // Construct a separate query object for counting with filters applied
+    const queryObj = { ...req.query };
+    const excludedFields = ["page", "sort", "limit", "fields", "month"];
+    excludedFields.forEach((el) => delete queryObj[el]);
+
+    // Parse the query string to convert query parameters like gte/gt/lte/lt into MongoDB operators
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    const parsedQuery = JSON.parse(queryStr);
+
+    // Apply the parsed filter to count active documents
+    const countQuery = Teacher.countDocuments(parsedQuery);
+
     // Fetch teachers and the count in one go
     const [teachers, numberOfActiveTeachers] = await Promise.all([
       features.query,
-      Teacher.countDocuments({ active: true }), // counts all documents in collection
+      countQuery.exec(),
     ]);
 
     res.status(200).json({
@@ -72,7 +85,7 @@ const addTeacher = async (req, res) => {
   }
 };
 
-// Get a specific teacher by ID  
+// Get a specific teacher by ID
 const getATeacher = async (req, res) => {
   try {
     const teacherId = req.params.id;
@@ -318,19 +331,31 @@ const search = async (req, res) => {
     // Extract search parameters
     const searchText = req.params.id || "";
     const regex = new RegExp(searchText.split("").join(".*"), "i");
+
+    // Define the base query for direct matching
+    const baseQuery = {
+      $or: [{ firstName: regex }, { middleName: regex }, { lastName: regex }],
+    };
+
+    // Count total documents matching the base query
+
     let features = new apiFeatures(
-      Teacher.find({
-        $or: [{ firstName: regex }, { middleName: regex }, { lastName: regex }],
-      })
-        .populate("subjects")
-        .populate("classes"),
+      Teacher.find(baseQuery).populate("subjects").populate("classes"),
       req.query
     )
       .filter()
       .sort()
       .limitFields()
       .paginate();
-    let results = await features.query;
+
+    // Execute the query to get paginated results
+    // Fetch teachers and the count in one go
+    let [results, totalResults] = await Promise.all([
+      features.query,
+      Teacher.countDocuments(baseQuery), // counts all documents in collection
+    ]);
+
+    // If no results found with direct match, attempt fuzzy search
     if (results.length < 1) {
       features = new apiFeatures(
         Teacher.fuzzySearch(searchText)
@@ -342,11 +367,17 @@ const search = async (req, res) => {
         .sort()
         .limitFields()
         .paginate();
-      results = await features.query;
+
+      [results, totalResults] = await Promise.all([
+        features.query,
+        Teacher.fuzzySearch(searchText).countDocuments(), // counts all documents in collection
+      ]);
     }
-    // Return the results
+
+    // Return the results with total count for pagination
     res.status(200).json({
       status: "success",
+      totalResults,
       results: results.length,
       data: results,
     });

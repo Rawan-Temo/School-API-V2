@@ -352,6 +352,8 @@ const search = async (req, res) => {
     // Extract search parameters
     const searchText = req.params.id || "";
     const regex = new RegExp(searchText.split("").join(".*"), "i");
+
+    // Base query for direct matching
     let features = new apiFeatures(
       Student.find({
         $or: [{ firstName: regex }, { middleName: regex }, { lastName: regex }],
@@ -364,30 +366,45 @@ const search = async (req, res) => {
       .sort()
       .limitFields()
       .paginate();
-    let results = await features.query;
+
+    // Execute query and count matching documents
+    let [results, totalResults] = await Promise.all([
+      features.query,
+      Student.countDocuments({
+        $or: [{ firstName: regex }, { middleName: regex }, { lastName: regex }],
+      }),
+    ]);
+
+    // If no direct matches found, switch to fuzzy search
     if (results.length < 1) {
       features = new apiFeatures(
         Student.fuzzySearch(searchText)
           .populate("subjects")
-          .populate("classes"), // Adjust this to match your fuzzy search implementation
+          .populate("classes"),
         req.query
       )
         .filter()
         .sort()
         .limitFields()
         .paginate();
-      results = await features.query;
+
+      // Execute fuzzy search query and count
+      [results, totalResults] = await Promise.all([
+        features.query,
+        Student.fuzzySearch(searchText).countDocuments(),
+      ]);
     }
-    // Return the results
+
+    // Send response with results and total count for pagination
     res.status(200).json({
       status: "success",
+      totalResults,
       results: results.length,
       data: results,
     });
   } catch (error) {
-    // Log the error for server debugging
+    // Log error and send error response
     console.error("Error performing search:", error);
-
     res.status(500).json({
       status: "error",
       message: error.message,

@@ -3,11 +3,11 @@ const router = express.Router();
 const examResultController = require("../controllers/examResultController.js");
 router.get("/count", examResultController.countData);
 
-router.route("/details/:id").get(examResultController.detailedResults);
 router
-  .route("/")
-  .get(examResultController.allResults)
-  .post(examResultController.addResult);
+.route("/")
+.get(examResultController.allResults)
+.post(examResultController.addResult);
+router.route("/details/:id").get(examResultController.detailedResults);
 router.get("/search/:id", examResultController.search);
 
 router.route("/deactivate/:id").patch(examResultController.deactivateResult);

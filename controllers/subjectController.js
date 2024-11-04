@@ -176,10 +176,10 @@ const search = async (req, res) => {
   const searchText = req.params.id || "";
 
   try {
-    // Create a regex pattern that matches if any part of the word is present
+    // Create a regex pattern to allow partial matches
     const regex = new RegExp(searchText.split("").join(".*"), "i");
 
-    // Query the database with the regex pattern
+    // Initialize apiFeatures for direct match query
     let features = new apiFeatures(
       Subject.find({
         $or: [{ name: regex }, { description: regex }],
@@ -190,11 +190,20 @@ const search = async (req, res) => {
       .sort()
       .limitFields()
       .paginate();
-    let results = await features.query;
+
+    // Execute query and count matching documents simultaneously
+    let [results, totalResults] = await Promise.all([
+      features.query,
+      Subject.countDocuments({
+        $or: [{ name: regex }, { description: regex }],
+      }),
+    ]);
+
+    // If no direct matches found, switch to fuzzy search
     if (results.length < 1) {
-      // Create a new apiFeatures instance for the fuzzy search
+      // New apiFeatures instance for fuzzy search
       features = new apiFeatures(
-        Subject.fuzzySearch(searchText), // Adjust this to match your fuzzy search implementation
+        Subject.fuzzySearch(searchText), // Adjust based on fuzzy search implementation
         req.query
       )
         .filter()
@@ -202,19 +211,23 @@ const search = async (req, res) => {
         .limitFields()
         .paginate();
 
-      results = await features.query;
+      // Execute fuzzy search query and count documents
+      [results, totalResults] = await Promise.all([
+        features.query,
+        Subject.fuzzySearch(searchText).countDocuments(),
+      ]);
     }
 
-    // Return the results
+    // Return the response with total count and results
     res.status(200).json({
       status: "success",
+      totalResults,
       results: results.length,
       data: results,
     });
   } catch (error) {
-    // Log the error for server debugging
+    // Log error and send error response
     console.error("Error performing search:", error);
-
     res.status(500).json({
       status: "error",
       message: error.message,
