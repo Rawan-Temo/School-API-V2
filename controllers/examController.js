@@ -7,9 +7,22 @@ const allExams = async (req, res) => {
       .filter()
       .limitFields()
       .paginate();
+
+    // Construct a separate query object for counting with filters applied
+    const queryObj = { ...req.query };
+    const excludedFields = ["page", "sort", "limit", "fields", "month"];
+    excludedFields.forEach((el) => delete queryObj[el]);
+
+    // Parse the query string to convert query parameters like gte/gt/lte/lt into MongoDB operators
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    const parsedQuery = JSON.parse(queryStr);
+
+    // Apply the parsed filter to count active documents
+    const countQuery = Exam.countDocuments(parsedQuery);
     const [exams, numberOfActiveExams] = await Promise.all([
       features.query.populate("classId subjectId"), // Populate class and subject
-      Exam.countDocuments({ active: true }),
+      countQuery.exec(),
     ]);
     res.status(200).json({
       status: "success",
