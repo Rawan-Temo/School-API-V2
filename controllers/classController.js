@@ -168,7 +168,12 @@ const deactivateClass = async (req, res) => {
 // };
 const countData = async (req, res) => {
   try {
-    const numberOfDocuments = await ClassModel.countDocuments({ active: true });
+    const filter = {};
+    filter.active = true;
+    req.query.classId && (filter.classId = req.query.classId);
+    console.log(filter);
+
+    const numberOfDocuments = await ClassModel.countDocuments(filter);
     // Step 2: Return success response
     res.status(200).json({
       status: "success",
