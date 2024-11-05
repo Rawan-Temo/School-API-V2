@@ -6,7 +6,10 @@ const User = require("../models/user");
 // Get all teachers with optional filtering, sorting, and pagination
 const getAllTeachers = async (req, res) => {
   try {
-    const features = new apiFeatures(Teacher.find(), req.query)
+    const features = new apiFeatures(
+      Teacher.find().populate("classes subjects"),
+      req.query
+    )
       .filter()
       .sort()
       .limitFields()
