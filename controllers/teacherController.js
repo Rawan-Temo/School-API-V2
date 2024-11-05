@@ -6,8 +6,9 @@ const User = require("../models/user");
 // Get all teachers with optional filtering, sorting, and pagination
 const getAllTeachers = async (req, res) => {
   try {
+    // Initialize the API features for filtered, sorted, and paginated teacher data
     const features = new apiFeatures(
-      Teacher.find().populate("classes subjects"),
+      Teacher.find({ active: true }).populate("classes subjects"), // Fetch classes and subjects data
       req.query
     )
       .filter()
@@ -15,29 +16,24 @@ const getAllTeachers = async (req, res) => {
       .limitFields()
       .paginate();
 
-    // Construct a separate query object for counting with filters applied
-    const queryObj = { ...req.query };
-    const excludedFields = ["page", "sort", "limit", "fields", "month"];
-    excludedFields.forEach((el) => delete queryObj[el]);
+    // Convert the filtered query into a plain object for counting
+    const countFeatures = new apiFeatures(
+      Teacher.find({ active: true }), // Use base Teacher query for counting
+      req.query
+    ).filter(); // Only apply filter without sorting, pagination, or field limiting
 
-    // Parse the query string to convert query parameters like gte/gt/lte/lt into MongoDB operators
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    const parsedQuery = JSON.parse(queryStr);
-
-    // Apply the parsed filter to count active documents
-    const countQuery = Teacher.countDocuments(parsedQuery);
-
-    // Fetch teachers and the count in one go
+    // Use `Promise.all` to execute both queries simultaneously
     const [teachers, numberOfActiveTeachers] = await Promise.all([
-      features.query,
-      countQuery.exec(),
+      features.query, // Get paginated teachers
+      countFeatures.query.countDocuments(), // Count all filtered documents
     ]);
+    // Step 3: Send the response with detailed logging for debugging
 
     res.status(200).json({
       status: "success",
+      results: teachers.length,
       numberOfActiveTeachers,
-      teachers,
+      data: teachers,
     });
   } catch (error) {
     console.error(error);
