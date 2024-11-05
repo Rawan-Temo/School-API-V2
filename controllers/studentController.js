@@ -3,37 +3,41 @@ const apiFeatures = require("../utils/apiFeatures");
 const User = require("../models/user");
 
 // Get all students with optional filtering, sorting, and pagination
+// Get all students with optional filtering, sorting, and pagination
 const getAllStudents = async (req, res) => {
   try {
-    const features = new apiFeatures(Student.find(), req.query)
+    // Initialize the API features for filtered, sorted, and paginated student data
+    const features = new apiFeatures(
+      Student.find({ active: true }).populate("classes subjects"), // Fetch classes and subjects data if applicable
+      req.query
+    )
       .filter()
       .sort()
       .limitFields()
       .paginate();
-    // Construct a separate query object for counting with filters applied
-    const queryObj = { ...req.query };
-    const excludedFields = ["page", "sort", "limit", "fields", "month"];
-    excludedFields.forEach((el) => delete queryObj[el]);
 
-    // Parse the query string to convert query parameters like gte/gt/lte/lt into MongoDB operators
-    let queryStr = JSON.stringify(queryObj);
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    const parsedQuery = JSON.parse(queryStr);
+    // Convert the filtered query into a plain object for counting
+    const countFeatures = new apiFeatures(
+      Student.find({ active: true }), // Use base Student query for counting
+      req.query
+    ).filter(); // Only apply filter without sorting, pagination, or field limiting
 
-    // Apply the parsed filter to count active documents
-    const countQuery = Student.countDocuments(parsedQuery);
-    // Fetch teachers and the count in one go
+    // Use `Promise.all` to execute both queries simultaneously
     const [students, numberOfActiveStudents] = await Promise.all([
-      features.query,
-      countQuery.exec(), // counts all documents in collection
+      features.query, // Get paginated students
+      countFeatures.query.countDocuments(), // Count all filtered documents
     ]);
+
+    // Step 3: Send the response with detailed logging for debugging
     res.status(200).json({
       status: "success",
-      numberOfActiveStudents,
-      data: students,
+      results: students.length, // Number of students returned in the current query
+      numberOfActiveStudents, // Total number of active students matching filters
+      data: students, // The actual student data
     });
   } catch (error) {
-    res.status(400).json({ status: "fail", message: error.message });
+    console.error(error); // Log the error for debugging
+    res.status(500).json({ status: "fail", message: error.message }); // Send error response
   }
 };
 // Get all students with optional filtering, sorting, and pagination
@@ -389,6 +393,7 @@ const search = async (req, res) => {
       features.query,
       Student.countDocuments({
         $or: [{ firstName: regex }, { middleName: regex }, { lastName: regex }],
+        active: true,
       }),
     ]);
 
@@ -408,7 +413,7 @@ const search = async (req, res) => {
       // Execute fuzzy search query and count
       [results, totalResults] = await Promise.all([
         features.query,
-        Student.fuzzySearch(searchText).countDocuments(),
+        Student.fuzzySearch(searchText).countDocuments({ active: true }),
       ]);
     }
 

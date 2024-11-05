@@ -334,6 +334,7 @@ const search = async (req, res) => {
     // Define the base query for direct matching
     const baseQuery = {
       $or: [{ firstName: regex }, { middleName: regex }, { lastName: regex }],
+      active: true,
     };
 
     // Count total documents matching the base query
@@ -369,7 +370,7 @@ const search = async (req, res) => {
 
       [results, totalResults] = await Promise.all([
         features.query,
-        Teacher.fuzzySearch(searchText).countDocuments(), // counts all documents in collection
+        Teacher.fuzzySearch(searchText).countDocuments({ active: true }), // counts all documents in collection
       ]);
     }
 
