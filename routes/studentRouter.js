@@ -1,22 +1,45 @@
 const express = require("express");
 const router = express.Router();
 const studentController = require("../controllers/studentController.js");
-router.get("/count-students", studentController.countData);
-router.get("/count-gender", studentController.countGender);
+const {
+  authenticateToken,
+  isAdmin,
+  isTeacher,
+  isStudent,
+} = require("../middlewares/authMiddleware.js");
+router.get("/count-students", authenticateToken, studentController.countData);
+router.get("/count-gender", authenticateToken, studentController.countGender);
 
-router.route("/details").get(studentController.getAllStudentsWithDetails);
-router.route("/deleteStudents").patch(studentController.deActivateManyStudents);
+router
+  .route("/details")
+  .get(
+    authenticateToken,
+    isTeacher,
+    studentController.getAllStudentsWithDetails
+  );
+router
+  .route("/deleteStudents")
+  .patch(authenticateToken, isAdmin, studentController.deActivateManyStudents);
 router
   .route("/")
-  .get(studentController.getAllStudents)
-  .post(studentController.addStudent);
+  .get(authenticateToken, isTeacher, studentController.getAllStudents)
+  .post(authenticateToken, isAdmin, studentController.addStudent);
 // router.route("/delete/:id").delete(studentController.deleteStudentFinally);
-router.get("/search/:id", studentController.search);
-router.route("/deactivate/:id").patch(studentController.deactivateStudent);
-router.route("/increment-year/:id").patch(studentController.incrementYear);
+router.get(
+  "/search/:id",
+  authenticateToken,
+  isTeacher,
+  studentController.search
+);
+router
+  .route("/deactivate/:id")
+  .patch(authenticateToken, isAdmin, studentController.deactivateStudent);
+router
+  .route("/increment-year/:id")
+  .patch(authenticateToken, isAdmin, studentController.incrementYear);
 router
   .route("/:id")
-  .get(studentController.getAStudent)
-  .patch(studentController.updateStudent);
+  .get(authenticateToken, isStudent, studentController.getAStudent)
+  .patch(authenticateToken, isAdmin, studentController.updateStudent);
 
 module.exports = router;

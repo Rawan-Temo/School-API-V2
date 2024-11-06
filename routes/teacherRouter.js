@@ -1,21 +1,37 @@
 const express = require("express");
 const router = express.Router();
 const teacherController = require("../controllers/teacherController.js");
-router.get("/count-students", teacherController.countData);
-router.get("/count-gender", teacherController.countGender);
+const {
+  authenticateToken,
+  isAdmin,
+  isTeacher,
+  isStudent,
+} = require("../middlewares/authMiddleware.js");
+router.get("/count-students", authenticateToken, teacherController.countData);
+router.get("/count-gender", authenticateToken, teacherController.countGender);
 
-router.route("/details").get(teacherController.getAllTeachersWithDetails);
-router.route("/deleteTeachers").patch(teacherController.deActivateManyTeachers);
+router
+  .route("/details")
+  .get(
+    authenticateToken,
+    isTeacher,
+    teacherController.getAllTeachersWithDetails
+  );
+router
+  .route("/deleteTeachers")
+  .patch(authenticateToken, isAdmin, teacherController.deActivateManyTeachers);
 router
   .route("/")
-  .get(teacherController.getAllTeachers)
-  .post(teacherController.addTeacher);
+  .get(authenticateToken, isTeacher, teacherController.getAllTeachers)
+  .post(authenticateToken, isAdmin, teacherController.addTeacher);
 // router.route("/delete/:id").delete(teacherController.deActivateManyTeachers);
-router.get("/search/:id", teacherController.search);
-router.route("/deactivate/:id").patch(teacherController.deactivateTeacher);
+router.get("/search/:id", authenticateToken, teacherController.search);
+router
+  .route("/deactivate/:id")
+  .patch(authenticateToken, isAdmin, teacherController.deactivateTeacher);
 router
   .route("/:id")
-  .get(teacherController.getATeacher)
-  .patch(teacherController.updateTeacher);
+  .get(authenticateToken, isTeacher, teacherController.getATeacher)
+  .patch(authenticateToken, isAdmin, teacherController.updateTeacher);
 
 module.exports = router;

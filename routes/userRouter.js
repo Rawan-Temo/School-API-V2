@@ -8,15 +8,17 @@ const {
 } = require("../middlewares/authMiddleware.js");
 const userController = require("../controllers/userController.js");
 router.get("/count", userController.countData);
-
+router
+  .route("/profile")
+  .get(authenticateToken, isAdmin, userController.userProfile);
 router.route("/login").post(userController.login);
 router
   .route("/")
-  .get(userController.getAllUsers)
-  .post(userController.createUser);
+  .get(authenticateToken, isAdmin, userController.getAllUsers)
+  .post(authenticateToken, isAdmin, userController.createUser);
 
 router
   .route("/:id")
-  .get(userController.getAUser)
-  .delete(userController.deleteAUser);
+  .get(authenticateToken, isAdmin, userController.getAUser)
+  .delete(authenticateToken, isAdmin, userController.deleteAUser);
 module.exports = router;

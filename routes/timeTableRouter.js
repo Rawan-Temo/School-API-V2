@@ -1,22 +1,37 @@
 const express = require("express");
 const router = express.Router();
 const timeTableController = require("../controllers/timeTableController.js");
-router.get("/count", timeTableController.countData);
+const {
+  authenticateToken,
+  isAdmin,
+  isTeacher,
+  isStudent,
+} = require("../middlewares/authMiddleware.js");
+
+router.get("/count", authenticateToken, isAdmin, timeTableController.countData);
 
 router
   .route("/")
-  .get(timeTableController.allTimeTables)
-  .post(timeTableController.addTimeTable);
+  .get(authenticateToken, isStudent, timeTableController.allTimeTables)
+  .post(authenticateToken, isAdmin, timeTableController.addTimeTable);
 
-router.route("/deactivate/:id").patch(timeTableController.deactivateTimeTable);
-router.route("/time-filter").get(timeTableController.timeResults);
+router
+  .route("/deactivate/:id")
+  .patch(authenticateToken, isAdmin, timeTableController.deactivateTimeTable);
+router
+  .route("/time-filter")
+  .get(authenticateToken, isStudent, timeTableController.timeResults);
 router
   .route("/deactivate-many")
-  .patch(timeTableController.deactivateManyTimeTables);
+  .patch(
+    authenticateToken,
+    isAdmin,
+    timeTableController.deactivateManyTimeTables
+  );
 
 router
   .route("/:id")
-  .get(timeTableController.aTimeTable)
-  .patch(timeTableController.updateTimeTable);
+  .get(authenticateToken, isStudent, timeTableController.aTimeTable)
+  .patch(authenticateToken, isAdmin, timeTableController.updateTimeTable);
 
 module.exports = router;

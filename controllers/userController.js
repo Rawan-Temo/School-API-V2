@@ -171,6 +171,13 @@ const countData = async (req, res) => {
     res.status(400).json({ status: "fail", message: error.message });
   }
 };
+const userProfile = async (req, res) => {
+  try {
+    res.status(200).json({ user: req.user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 module.exports = {
   getAllUsers,
   getAUser,
@@ -178,4 +185,5 @@ module.exports = {
   deleteAUser,
   login,
   countData,
+  userProfile,
 };

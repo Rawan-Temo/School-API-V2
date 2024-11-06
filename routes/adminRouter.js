@@ -1,17 +1,25 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/adminController.js");
-router.get("/count", adminController.countData);
+const {
+  authenticateToken,
+  isAdmin,
+  isTeacher,
+  isStudent,
+} = require("../middlewares/authMiddleware.js");
+router.get("/count", authenticateToken, isAdmin, adminController.countData);
 
 router
   .route("/")
-  .get(adminController.getAllAdmins)
-  .post(adminController.addAdmin);
+  .get(authenticateToken, isAdmin, adminController.getAllAdmins)
+  .post(authenticateToken, isAdmin, adminController.addAdmin);
 // router.route("/delete/:id").delete(studentController.deleteStudentFinally);
-router.route("/deactivate/:id").patch(adminController.deactivateAdmin);
+router
+  .route("/deactivate/:id")
+  .patch(authenticateToken, isAdmin, adminController.deactivateAdmin);
 
 router
   .route("/:id")
-  .get(adminController.getAnAdmin)
-  .patch(adminController.updateAdmin);
+  .get(authenticateToken, isAdmin, adminController.getAnAdmin)
+  .patch(authenticateToken, isAdmin, adminController.updateAdmin);
 module.exports = router;
