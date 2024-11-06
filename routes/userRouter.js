@@ -10,15 +10,15 @@ const userController = require("../controllers/userController.js");
 router.get("/count", userController.countData);
 router
   .route("/profile")
-  .get(authenticateToken, isAdmin, userController.userProfile);
+  .get(authenticateToken,userController.userProfile);
 router.route("/login").post(userController.login);
 router
   .route("/")
-  .get(authenticateToken, isAdmin, userController.getAllUsers)
-  .post(authenticateToken, isAdmin, userController.createUser);
+  .get(userController.getAllUsers)
+  .post(userController.createUser);
 
 router
   .route("/:id")
-  .get(authenticateToken, isAdmin, userController.getAUser)
-  .delete(authenticateToken, isAdmin, userController.deleteAUser);
+  .get(userController.getAUser)
+  .delete(userController.deleteAUser);
 module.exports = router;

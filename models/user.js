@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["student", "teacher", "admin"], // Roles can be student, teacher, or admin
+    enum: ["Student", "Teacher", "Admin"], // Roles can be student, teacher, or admin
     required: true,
   },
   // Reference to either Student, Teacher, or Admin model based on the role

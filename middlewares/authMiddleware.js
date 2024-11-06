@@ -19,13 +19,13 @@ const authenticateToken = async (req, res, next) => {
 };
 
 const isAdmin = async (req, res, next) => {
-  if (req.user && req.user.role === "admin") {
+  if (req.user && req.user.role === "Admin") {
     return next();
   }
   res.status(403).json({ message: "Access denied." });
 };
 const isTeacher = async (req, res, next) => {
-  if (req.user && (req.user.role === "admin" || req.user.role === "teacher")) {
+  if (req.user && (req.user.role === "Admin" || req.user.role === "Teacher")) {
     return next();
   }
   res.status(403).json({ message: "Access denied." });
@@ -33,9 +33,9 @@ const isTeacher = async (req, res, next) => {
 const isStudent = async (req, res, next) => {
   if (
     req.user &&
-    (req.user.role === "admin" ||
-      req.user.role === "teacher" ||
-      req.user.role === "student")
+    (req.user.role === "Admin" ||
+      req.user.role === "Teacher" ||
+      req.user.role === "Student")
   ) {
     return next();
   }

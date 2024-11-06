@@ -68,12 +68,12 @@ const createUser = async (req, res) => {
     // Check if the profile exists in the corresponding model based on the role
     let profileExists = false;
 
-    if (role === "teacher") {
+    if (role === "Teacher") {
       profileExists = await Teacher.findOne({ _id: profileId, active: true });
       console.log();
-    } else if (role === "student") {
+    } else if (role === "Student") {
       profileExists = await Student.findOne({ _id: profileId, active: true });
-    } else if (role === "admin") {
+    } else if (role === "Admin") {
       profileExists = await Admin.findOne({ _id: profileId, active: true });
     }
 
