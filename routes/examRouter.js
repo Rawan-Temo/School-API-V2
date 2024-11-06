@@ -1,29 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const examController = require("../controllers/examController.js");
-const {
-  authenticateToken,
-  isAdmin,
-  isTeacher,
-  isStudent,
-} = require("../middlewares/authMiddleware.js");
-router.get("/count", authenticateToken, examController.countData);
+router.get("/count", examController.countData);
 
-router
-  .route("/")
-  .get(authenticateToken, isStudent, examController.allExams)
-  .post(authenticateToken, isAdmin, examController.addExam);
+router.route("/").get(examController.allExams).post(examController.addExam);
 
-router
-  .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, examController.deactivateExam);
-router
-  .route("/deactivate-many")
-  .patch(authenticateToken, isAdmin, examController.deactivateManyExams);
+router.route("/deactivate/:id").patch(examController.deactivateExam);
+router.route("/deactivate-many").patch(examController.deactivateManyExams);
 
 router
   .route("/:id")
-  .get(authenticateToken, isStudent, examController.anExam)
-  .patch(authenticateToken, isAdmin, examController.updateExam);
+  .get(examController.anExam)
+  .patch(examController.updateExam);
 
 module.exports = router;

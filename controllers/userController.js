@@ -173,7 +173,10 @@ const countData = async (req, res) => {
 };
 const userProfile = async (req, res) => {
   try {
-    res.status(200).json({ user: req.user });
+    // Populate the profileId field
+    const user = await req.user.populate("profileId").execPopulate();
+
+    res.status(200).json({ user });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
