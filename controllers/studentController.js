@@ -327,7 +327,6 @@ const countData = async (req, res) => {
     const filter = {};
     filter.active = true;
     req.query.classId && (filter.classId = req.query.classId);
-    console.log(filter);
 
     const numberOfDocuments = await Student.countDocuments(filter);
     // Step 2: Return success response
