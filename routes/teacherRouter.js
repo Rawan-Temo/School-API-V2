@@ -7,7 +7,7 @@ const {
   isTeacher,
   isStudent,
 } = require("../middlewares/authMiddleware.js");
-router.get("/count-students", authenticateToken, teacherController.countData);
+router.get("/count-teachers", authenticateToken, teacherController.countData);
 router.get("/count-gender", authenticateToken, teacherController.countGender);
 
 router

@@ -65,6 +65,8 @@ This project is a comprehensive Node.js-based school management system designed 
 │ └── timetableRoutes.js
 ├── utils
 │ └── apiFeatures.js
+├── middlewares
+│ └── authMiddleware.js
 ├── index.js
 └── db.js
 \`\`\`

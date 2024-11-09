@@ -39,7 +39,7 @@ router
   .patch(authenticateToken, isAdmin, studentController.incrementYear);
 router
   .route("/:id")
-  .get(authenticateToken, isStudent, studentController.getAStudent)
-  .patch(authenticateToken, isAdmin, studentController.updateStudent);
+  .get(authenticateToken,  isStudent,   studentController.getAStudent)
+  .patch(authenticateToken,  isAdmin, studentController.updateStudent);
 
 module.exports = router;
