@@ -61,7 +61,7 @@ const aResult = async (req, res) => {
 // Add a new exam result
 const addResult = async (req, res) => {
   try {
-    const { student, exam, score, date } = req.body;
+    const { student, exam, score, type } = req.body;
 
     // Check if the exam exists
     const targetExam = await Exam.findById(exam);
@@ -108,8 +108,8 @@ const addResult = async (req, res) => {
     const newExamResult = new ExamResult({
       student,
       exam,
+      type,
       score,
-      date,
       studentName: `${studentData.firstName} ${studentData.lastName}`, // Denormalized field
     });
 
