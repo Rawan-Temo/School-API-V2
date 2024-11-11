@@ -6,9 +6,14 @@ const examResultSchema = new mongoose.Schema({
     ref: "Student", // Reference to the Student model
     required: true,
   },
+  type: {
+    type: String,
+    enum: ["Exam", "Quiz"],
+    required: true,
+  },
   exam: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Exam", // Reference to the Exam model
+    refPath: "type", // Reference to the Exam model
     required: true,
   },
   studentName: {

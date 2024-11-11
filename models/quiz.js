@@ -22,13 +22,22 @@ const questionSchema = new mongoose.Schema({
     required: function () {
       return this.type === "true-false";
     },
-  }, // Required for true/false questions
+  },
+  // Required for true/false questions
 });
 
 const quizSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String },
   questions: [questionSchema],
+  date: {
+    type: Date,
+    required: true,
+  },
+  active: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const Quiz = mongoose.model("Quiz", quizSchema);

@@ -1,26 +1,35 @@
 const express = require("express");
 const router = express.Router();
 const quizController = require("../controllers/quizController");
-
+const {
+  authenticateToken,
+  isAdmin,
+  isTeacher,
+  isStudent,
+} = require("../middlewares/authMiddleware.js");
 // Quiz routes
 router
   .route("/")
-  .post(quizController.createQuiz)
-  .get(quizController.getAllQuizzes);
+  .post(authenticateToken, isAdmin, quizController.createQuiz)
+  .get(authenticateToken, isStudent, quizController.getAllQuizzes);
 
 router
   .route("/:id")
-  .get(quizController.getQuizById)
-  .patch(quizController.updateQuiz)
-  .delete(quizController.deleteQuiz);
+  .get(authenticateToken, isStudent, quizController.getQuizById)
+  .patch(authenticateToken, isAdmin, quizController.updateQuiz);
 
+router
+  .route("/deactivate/:id")
+  .patch(authenticateToken, isAdmin, quizController.deactivateQuiz);
 // // Question routes
 
-router.route("/:quizId/questions").get(quizController.getAllQuestions);
+router
+  .route("/:quizId/questions")
+  .get(authenticateToken, isStudent, quizController.getAllQuestions);
 
 router
   .route("/:quizId/questions/:questionId")
-  .get(quizController.getQuestionById)
+  .get(authenticateToken, isStudent, quizController.getQuestionById);
 //   .patch(quizController.updateQuestion)
 //   .delete(quizController.deleteQuestion);
 

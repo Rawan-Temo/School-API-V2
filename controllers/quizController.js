@@ -1,26 +1,40 @@
 const Quiz = require("../models/quiz.js");
+const apiFeatures = require("../utils/apiFeatures");
 
 const getAllQuizzes = async (req, res) => {
   try {
-    // Retrieve all quizzes from the database, optionally populate related data
-    const quizzes = await Quiz.find().populate({
-      path: "questions",
-      populate: {
-        path: "choices",
-      },
-    });
-    const numberOfQuizes = await Quiz.countDocuments();
+    // Initialize the API features for filtered, sorted, and paginated quiz data
+    const features = new apiFeatures(
+      Quiz.find().populate({
+        path: "questions",
+        populate: { path: "choices" },
+      }),
+      req.query
+    )
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
 
-    // Respond with the list of quizzes
+    // Initialize a separate feature for counting quizzes with only filtering
+    const countFeatures = new apiFeatures(Quiz.find(), req.query).filter();
+
+    // Execute both queries in parallel
+    const [quizzes, numberOfQuizzes] = await Promise.all([
+      features.query, // Get paginated quizzes
+      countFeatures.query.countDocuments(), // Count all filtered documents
+    ]);
+
+    // Send the response
     res.status(200).json({
       status: "success",
-      numberOfQuizes,
       results: quizzes.length,
+      numberOfQuizzes,
       data: quizzes,
     });
   } catch (error) {
-    // Handle any errors that occur during the process
-    res.status(400).json({
+    console.error(error);
+    res.status(500).json({
       status: "fail",
       message: error.message,
     });
@@ -78,15 +92,31 @@ const updateQuiz = async (req, res) => {
 };
 
 // Delete a quiz by ID
-const deleteQuiz = async (req, res) => {
+const deactivateQuiz = async (req, res) => {
   try {
-    const deletedQuiz = await Quiz.findByIdAndDelete(req.params.id);
-    if (!deletedQuiz) {
+    const quizId = req.params.id;
+    const quiz = await Quiz.findById(quizId);
+
+    if (!quiz) {
       return res
         .status(404)
         .json({ status: "fail", message: "Quiz not found" });
     }
-    res.status(204).json({ status: "success", data: null });
+    if (!quiz.active) {
+      return res.status(200).json({
+        status: "success",
+        message: "Quiz is already deactivated",
+      });
+    }
+
+    // Soft delete by setting 'active' to false
+    quiz.active = false;
+    await quiz.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Quiz deactivated successfully",
+    });
   } catch (error) {
     res.status(400).json({ status: "fail", message: error.message });
   }
@@ -205,9 +235,9 @@ module.exports = {
   getAllQuizzes,
   getQuizById,
   updateQuiz,
-  deleteQuiz,
+  deactivateQuiz,
   getAllQuestions,
   getQuestionById,
-//   updateQuestion,
-//   deleteQuestion,
+  //   updateQuestion,
+  //   deleteQuestion,
 };
