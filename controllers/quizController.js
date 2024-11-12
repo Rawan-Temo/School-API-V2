@@ -5,10 +5,13 @@ const getAllQuizzes = async (req, res) => {
   try {
     // Initialize the API features for filtered, sorted, and paginated quiz data
     const features = new apiFeatures(
-      Quiz.find().populate({
-        path: "questions",
-        populate: { path: "choices" },
-      }),
+      Quiz.find()
+        .populate({
+          path: "questions",
+          populate: { path: "choices" },
+        })
+        .populate("classId") // Populate the Class document
+        .populate("subjectId"), // Populate the Subject document
       req.query
     )
       .filter()
