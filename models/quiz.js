@@ -41,6 +41,10 @@ const quizSchema = new mongoose.Schema({
     required: true,
     enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // Year levels from 1 to 12
   },
+  duration: {
+    type: Number, // Duration in minutes
+    required: true,
+  },
   description: { type: String },
   questions: [questionSchema],
   date: {
