@@ -13,8 +13,8 @@ const authenticateToken = async (req, res, next) => {
     if (!foundUser) return res.sendStatus(404); // User not found
 
     req.user = foundUser; // Attach user to request object
+    next();
   });
-  next();
 };
 
 const isAdmin = async (req, res, next) => {
