@@ -46,7 +46,9 @@ const getAllQuizzes = async (req, res) => {
 // Get a quiz by ID
 const getQuizById = async (req, res) => {
   try {
-    const quiz = await Quiz.findById(req.params.id);
+    const quiz = await Quiz.findById(req.params.id).populate(
+      "classId subjectId"
+    );
     if (!quiz) {
       return res
         .status(404)
