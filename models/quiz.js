@@ -9,7 +9,6 @@ const questionSchema = new mongoose.Schema({
   text: {
     type: String,
     required: true,
-    unique: true,
   },
   type: {
     type: String,
