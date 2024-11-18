@@ -3,6 +3,7 @@ const Exam = require("../models/exam");
 const apiFeatures = require("../utils/apiFeatures");
 const Student = require("../models/student.js");
 const mongoose = require("mongoose");
+const Quiz = require("../models/quiz.js");
 // Get all exam results with pagination, sorting, and filtering
 const allResults = async (req, res) => {
   try {
@@ -64,7 +65,10 @@ const addResult = async (req, res) => {
     const { student, exam, score, type } = req.body;
 
     // Check if the exam exists
-    const targetExam = await Exam.findById(exam);
+    let targetExam = await Exam.findById(exam);
+    if (!targetExam) {
+      targetExam = await Quiz.findById(exam);
+    }
     if (!targetExam) {
       return res.status(404).json({
         status: "fail",
