@@ -302,46 +302,79 @@ const detailedResults = async (req, res) => {
     const studentId = req.params.id;
 
     // Check if the student exists
-    const studentExists = await Student.findById(studentId);
-    if (!studentExists) {
-      return res.status(404).json({
-        status: "fail",
-        message: "Student not found.",
-      });
-    }
-
-    // Aggregate the exam results for the specified student, grouped by subject
     const results = await ExamResult.aggregate([
-      { $match: { student: mongoose.Types.ObjectId(studentId), active: true } }, // Filter by student ID and active results
+      // Filter by student ID and active results
+      { $match: { student: mongoose.Types.ObjectId(studentId), active: true } },
       {
         $lookup: {
-          from: "exams", // Reference to the Exam collection
+          from: "exams", // Reference the Exam collection for "Exam" type
           localField: "exam",
           foreignField: "_id",
           as: "examDetails",
         },
       },
-      { $unwind: "$examDetails" }, // Unwind the exam details array
+      { $unwind: { path: "$examDetails", preserveNullAndEmptyArrays: true } }, // Unwind the exam details array (handle null)
       {
         $lookup: {
-          from: "subjects", // Reference to the Subject collection
-          localField: "examDetails.subjectId",
+          from: "quizzes", // Reference the Quiz collection for "Quiz" type
+          localField: "exam",
+          foreignField: "_id",
+          as: "quizDetails",
+        },
+      },
+      { $unwind: { path: "$quizDetails", preserveNullAndEmptyArrays: true } }, // Unwind the quiz details array (handle null)
+      {
+        $addFields: {
+          subjectId: {
+            $ifNull: ["$examDetails.subjectId", "$quizDetails.subjectId"], // Choose subjectId from Exam or Quiz
+          },
+          date: {
+            $ifNull: ["$examDetails.date", "$quizDetails.date"], // Choose date from Exam or Quiz
+          },
+          title: {
+            $ifNull: ["$examDetails.title", "$quizDetails.title"], // Choose title from Exam or Quiz
+          },
+          totalMarks: {
+            $cond: {
+              if: { $eq: ["$type", "Quiz"] }, // Check if the type is "Quiz"
+              then: 100, // Override totalMarks to 100
+              else: {
+                $ifNull: ["$examDetails.totalMarks", "$quizDetails.totalMarks"], // Default to respective totalMarks
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "subjects", // Reference the Subject collection
+          localField: "subjectId",
           foreignField: "_id",
           as: "subjectDetails",
         },
       },
-      { $unwind: "$subjectDetails" }, // Unwind the subject details array
+      {
+        $unwind: { path: "$subjectDetails", preserveNullAndEmptyArrays: true },
+      }, // Unwind the subject details array (handle null)
+      {
+        $addFields: {
+          subjectName: {
+            $ifNull: ["$subjectDetails.name", "General"], // Default to "General" if subject name is null
+          },
+        },
+      },
       {
         $group: {
-          _id: "$subjectDetails.name", // Group by subject name
+          _id: "$subjectName", // Group by subject name
           results: {
             $push: {
               examResultId: "$_id",
-              examId: "$examDetails._id",
-              examTitle: "$examDetails.title",
-              date: "$examDetails.date",
+              examId: "$exam",
+              examTitle: "$title",
+              date: "$date",
               score: "$score",
-              totalMarks: "$examDetails.totalMarks",
+              type: "$type",
+              totalMarks: "$totalMarks",
             },
           },
         },
