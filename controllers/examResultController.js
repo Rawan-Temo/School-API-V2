@@ -7,7 +7,10 @@ const Quiz = require("../models/quiz.js");
 // Get all exam results with pagination, sorting, and filtering
 const allResults = async (req, res) => {
   try {
-    const features = new apiFeatures(ExamResult.find(), req.query)
+    const features = new apiFeatures(
+      ExamResult.find().populate("exam"),
+      req.query
+    )
       .sort()
       .filter()
       .limitFields()
