@@ -24,10 +24,7 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     refPath: "role", // Dynamically references either Student, Teacher, or Admin based on the role
   },
-  active: {
-    type: Boolean,
-    default: true,
-  },
+
   createdAt: {
     type: Date,
     default: Date.now,

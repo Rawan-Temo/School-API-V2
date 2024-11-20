@@ -16,9 +16,11 @@ const getAllUsers = async (req, res) => {
       .paginate();
 
     const users = await features.query;
+    const numverOfAcriveUsers = User.countDocuments();
 
     res.status(200).json({
       status: "success",
+      numverOfAcriveUsers,
       results: users.length,
       data: users,
     });
