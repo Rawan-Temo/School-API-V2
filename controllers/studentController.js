@@ -183,8 +183,14 @@ const updateStudent = async (req, res) => {
 const incrementYear = async (req, res) => {
   try {
     const studentId = req.params.id;
-    const incrementYear = req.body.yearLevel; // Year level to be updated
-    const incrementCount = req.body.yearCount; // Count to be incremented
+    const yearUpdates = req.body.yearRepeated; // Array of { yearLevel, yearCount }
+
+    if (!Array.isArray(yearUpdates)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Invalid input, yearRepeated should be an array.",
+      });
+    }
 
     // Step 1: Find the student by ID
     const student = await Student.findById(studentId);
@@ -196,26 +202,29 @@ const incrementYear = async (req, res) => {
         .json({ status: "fail", message: "Student not found" });
     }
 
-    // Step 2: Check if the year level already exists in yearRepeated
-    const repeatedYear = student.yearRepeated.find(
-      (item) => item.yearLevel === incrementYear
-    );
+    // Step 2: Iterate over the yearRepeated array and update the student's data
+    yearUpdates.forEach(({ yearLevel, yearCount }) => {
+      // Check if the year level already exists in yearRepeated
+      const repeatedYear = student.yearRepeated.find(
+        (item) => item.yearLevel === yearLevel
+      );
 
-    if (repeatedYear) {
-      // Step 3: If it exists, increment the yearCount by the provided incrementCount
-      repeatedYear.yearCount = incrementCount;
-    } else {
-      // Step 4: If it does not exist, add a new entry with yearLevel and yearCount
-      student.yearRepeated.push({
-        yearLevel: incrementYear,
-        yearCount: incrementCount,
-      });
-    }
+      if (repeatedYear) {
+        // If it exists, update the yearCount
+        repeatedYear.yearCount = yearCount;
+      } else {
+        // If it does not exist, add a new entry
+        student.yearRepeated.push({
+          yearLevel,
+          yearCount,
+        });
+      }
+    });
 
-    // Step 5: Save the updated student back to the database
+    // Step 3: Save the updated student back to the database
     await student.save();
 
-    // Step 6: Return success response
+    // Step 4: Return success response
     res.status(200).json({
       status: "success",
       data: student,

@@ -72,7 +72,6 @@ const createUser = async (req, res) => {
 
     if (role === "Teacher") {
       profileExists = await Teacher.findOne({ _id: profileId, active: true });
-      console.log();
     } else if (role === "Student") {
       profileExists = await Student.findOne({ _id: profileId, active: true });
     } else if (role === "Admin") {
@@ -177,7 +176,6 @@ const userProfile = async (req, res) => {
   try {
     // Populate the profileId field
     const user = await req.user.populate("profileId").execPopulate();
-
     res.status(200).json({ user });
   } catch (error) {
     res.status(500).json({ message: error.message });

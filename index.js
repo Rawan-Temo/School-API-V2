@@ -5,6 +5,7 @@ const morgan = require("morgan");
 const helmet = require("helmet"); // For security enhancements
 const app = express();
 const port = process.env.PORT || 8000;
+const path = require("path");
 
 // Import routers
 const teacherRouter = require("./routes/teacherRouter.js");
@@ -25,7 +26,7 @@ connection();
 // Middleware
 app.use(express.json()); // Built-in JSON parser
 app.use(cors());
-app.use(morgan("tiny"));
+app.use(morgan(process.env.NODE_ENV === "production" ? "tiny" : "dev"));
 app.use(helmet()); // Security middleware
 
 // API Routes
@@ -41,6 +42,12 @@ app.use("/api/time-table", timeTableRouter);
 app.use("/api/quizzes", quizRouter);
 app.use("/api/admins", adminRouter);
 app.use("/api/users", userRouter);
+
+app.use(express.static(path.join(__dirname, "../client/build"))); // Make sure this path is correct
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/build", "index.html"));
+});
+
 app.use((req, res, next) => {
   res.status(404).json({ status: "fail", message: "Route not found" });
 });
