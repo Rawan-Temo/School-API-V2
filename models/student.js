@@ -23,6 +23,7 @@ const studentSchema = new mongoose.Schema({
       yearLevel: {
         type: Number,
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // Possible year levels
+        unique: true, // Ensure only one entry per year level
       },
       yearCount: {
         type: Number,
