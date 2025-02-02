@@ -107,9 +107,7 @@ studentSchema.pre("save", function (next) {
   const seenLevels = new Set();
   for (const entry of this.yearRepeated) {
     if (seenLevels.has(entry.yearLevel)) {
-      return next(
-        new Error(`Duplicate yearLevel ${entry.yearLevel} is not allowed.`)
-      );
+      return next();
     }
     seenLevels.add(entry.yearLevel);
   }
