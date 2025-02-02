@@ -89,21 +89,29 @@ studentSchema.pre("save", function (next) {
       this.yearRepeated = [];
     }
 
-    // Find existing yearLevel in yearRepeated
+    // Check if yearLevel already exists in yearRepeated
     const existingYear = this.yearRepeated.find(
       (year) => year.yearLevel === this.yearLevel
     );
 
-    if (existingYear) {
-      // If it exists, increment yearCount
-      existingYear.yearCount += 1;
-    } else {
-      // If it doesn't exist, add a new entry
+    if (!existingYear) {
+      // Add the new yearLevel if it's not already present
       this.yearRepeated.push({
         yearLevel: this.yearLevel,
-        yearCount: 1, // Start with count 1
+        yearCount: 1, // Start with a count of 1 for the first year
       });
     }
+  }
+
+  // Ensure uniqueness in yearRepeated before saving
+  const seenLevels = new Set();
+  for (const entry of this.yearRepeated) {
+    if (seenLevels.has(entry.yearLevel)) {
+      return next(
+        new Error(`Duplicate yearLevel ${entry.yearLevel} is not allowed.`)
+      );
+    }
+    seenLevels.add(entry.yearLevel);
   }
 
   next(); // Proceed to save
