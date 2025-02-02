@@ -107,7 +107,7 @@ studentSchema.pre("save", function (next) {
   const seenLevels = new Set();
   for (const entry of this.yearRepeated) {
     if (seenLevels.has(entry.yearLevel)) {
-      return next();
+      next();
     }
     seenLevels.add(entry.yearLevel);
   }
