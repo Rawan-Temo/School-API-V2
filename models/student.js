@@ -83,30 +83,30 @@ const studentSchema = new mongoose.Schema({
 });
 // Pre-save hook to initialize yearRepeated based on yearLevel
 studentSchema.pre("save", function (next) {
-  // Check if yearLevel is set
   if (this.yearLevel) {
-    // Initialize yearRepeated if it is empty
-    if (this.yearRepeated.length === 0) {
+    // Ensure yearRepeated exists
+    if (!this.yearRepeated) {
+      this.yearRepeated = [];
+    }
+
+    // Find existing yearLevel in yearRepeated
+    const existingYear = this.yearRepeated.find(
+      (year) => year.yearLevel === this.yearLevel
+    );
+
+    if (existingYear) {
+      // If it exists, increment yearCount
+      existingYear.yearCount += 1;
+    } else {
+      // If it doesn't exist, add a new entry
       this.yearRepeated.push({
         yearLevel: this.yearLevel,
-        yearCount: 1, // Start with a count of 1 for the first year
+        yearCount: 1, // Start with count 1
       });
-    } else {
-      // Check if the current yearLevel already exists in yearRepeated
-      const existingYear = this.yearRepeated.find(
-        (year) => year.yearLevel === this.yearLevel
-      );
-
-      if (!existingYear) {
-        // If it doesn't exist, add a new entry for the current yearLevel
-        this.yearRepeated.push({
-          yearLevel: this.yearLevel,
-          yearCount: 1,
-        });
-      }
     }
   }
-  next(); // Proceed to the next middleware or save
+
+  next(); // Proceed to save
 });
 
 // Optional: Add compound index for common query patterns
