@@ -23,7 +23,6 @@ const studentSchema = new mongoose.Schema({
       yearLevel: {
         type: Number,
         enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // Possible year levels
-        unique: true, // Ensure only one entry per year level
       },
       yearCount: {
         type: Number,
@@ -83,36 +82,30 @@ const studentSchema = new mongoose.Schema({
 });
 // Pre-save hook to initialize yearRepeated based on yearLevel
 studentSchema.pre("save", function (next) {
+  // Check if yearLevel is set
   if (this.yearLevel) {
-    // Ensure yearRepeated exists
-    if (!this.yearRepeated) {
-      this.yearRepeated = [];
-    }
-
-    // Check if yearLevel already exists in yearRepeated
-    const existingYear = this.yearRepeated.find(
-      (year) => year.yearLevel === this.yearLevel
-    );
-
-    if (!existingYear) {
-      // Add the new yearLevel if it's not already present
+    // Initialize yearRepeated if it is empty
+    if (this.yearRepeated.length === 0) {
       this.yearRepeated.push({
         yearLevel: this.yearLevel,
         yearCount: 1, // Start with a count of 1 for the first year
       });
+    } else {
+      // Check if the current yearLevel already exists in yearRepeated
+      const existingYear = this.yearRepeated.find(
+        (year) => year.yearLevel === this.yearLevel
+      );
+
+      if (!existingYear) {
+        // If it doesn't exist, add a new entry for the current yearLevel
+        this.yearRepeated.push({
+          yearLevel: this.yearLevel,
+          yearCount: 1,
+        });
+      }
     }
   }
-
-  // Ensure uniqueness in yearRepeated before saving
-  const seenLevels = new Set();
-  for (const entry of this.yearRepeated) {
-    if (seenLevels.has(entry.yearLevel)) {
-      next();
-    }
-    seenLevels.add(entry.yearLevel);
-  }
-
-  next(); // Proceed to save
+  next(); // Proceed to the next middleware or save
 });
 
 // Optional: Add compound index for common query patterns

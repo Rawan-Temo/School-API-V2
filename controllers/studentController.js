@@ -158,9 +158,11 @@ const updateStudent = async (req, res) => {
 
       // Check if the year level already exists in yearRepeated
 
-      const repeatedYear = existingStudent.yearRepeated.find(
-        (item) => item.yearLevel === currentYearLevel
-      );
+      const repeatedYear = existingStudent.yearRepeated.map((item) => {
+        if (item.yearLevel === currentYearLevel) return false;
+        return true;
+      });
+      console.log(repeatedYear);
 
       if (!repeatedYear) {
         // If it does not exist, add a new entry with yearCount 1
