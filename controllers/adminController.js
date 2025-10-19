@@ -1,8 +1,10 @@
 const Admin = require("../models/admin");
 const apiFeatures = require("../utils/apiFeatures");
 const User = require("../models/user");
-
+const createController = require("../utils/createControllers");
 // Get all admin s
+const adminController = createController(Admin, "Admin", ["name", "email"]);
+
 const getAllAdmins = async (req, res) => {
   try {
     const features = new apiFeatures(Admin.find(), req.query)
@@ -130,6 +132,7 @@ const countData = async (req, res) => {
   }
 };
 module.exports = {
+  ...adminController,
   getAllAdmins,
   addAdmin,
   deactivateAdmin,

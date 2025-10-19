@@ -1,15 +1,12 @@
 const mongoose = require("mongoose");
-
 const DB = process.env.DB.replace("<db_password>", process.env.DB_PASSWORD);
 
 module.exports = async function connection() {
   try {
-    await mongoose.connect(DB, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("DB CONECTION");
+    await mongoose.connect(DB);
+    console.log("DB CONNECTION");
   } catch (error) {
     console.log(error);
   }
 };
+2;

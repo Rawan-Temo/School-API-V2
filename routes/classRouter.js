@@ -15,11 +15,11 @@ router
   .post(authenticateToken, isAdmin, classController.addClass);
 
 router
-  .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, classController.deactivateClass);
-router
   .route("/deactivateMany")
   .patch(authenticateToken, isAdmin, classController.deactivateManyClasses);
+router
+  .route("/deactivate/:id")
+  .patch(authenticateToken, isAdmin, classController.deactivateClass);
 
 router
   .route("/:id")

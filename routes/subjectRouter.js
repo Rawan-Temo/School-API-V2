@@ -7,7 +7,6 @@ const {
   isTeacher,
   isStudent,
 } = require("../middlewares/authMiddleware.js");
-router.get("/search/:id", authenticateToken, subjectController.search);
 router.get("/count", authenticateToken, subjectController.countData);
 
 router
@@ -15,11 +14,11 @@ router
   .get(authenticateToken, isStudent, subjectController.AllSubjects)
   .post(authenticateToken, isAdmin, subjectController.addSubject);
 router
-  .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, subjectController.deactivateSubject);
-router
   .route("/deactivateMany")
   .patch(authenticateToken, isAdmin, subjectController.deactivateManySubject);
+router
+  .route("/deactivate/:id")
+  .patch(authenticateToken, isAdmin, subjectController.deactivateSubject);
 router
   .route("/:id")
   .get(authenticateToken, isStudent, subjectController.getASubject)

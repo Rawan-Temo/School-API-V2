@@ -20,7 +20,7 @@ const adminRouter = require("./routes/adminRouter.js");
 const userRouter = require("./routes/userRouter.js");
 const quizRouter = require("./routes/quizRouter.js");
 // Import and initialize database connection
-const connection = require("./db.js");
+const connection = require("./db");
 connection();
 
 // Middleware

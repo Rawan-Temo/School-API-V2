@@ -25,7 +25,6 @@ router
   .get(authenticateToken, isTeacher, teacherController.getAllTeachers)
   .post(authenticateToken, isAdmin, teacherController.addTeacher);
 // router.route("/delete/:id").delete(teacherController.deActivateManyTeachers);
-router.get("/search/:id", authenticateToken, teacherController.search);
 router
   .route("/deactivate/:id")
   .patch(authenticateToken, isAdmin, teacherController.deactivateTeacher);

@@ -23,6 +23,13 @@ router
   .route("/time-filter")
   .get(authenticateToken, isTeacher, attendanceController.timeResults);
 
+router
+  .route("/deleteAttendances")
+  .delete(
+    authenticateToken,
+    isTeacher,
+    attendanceController.deactivateManyAttendances
+  ); // Delete a specific attendance record
 // Route for specific attendance records by ID
 router
   .route("/:id")
@@ -39,12 +46,5 @@ router
   ); // Change PATCH to match HTTP conventions
 
 // Route to delete an attendance record by ID
-router
-  .route("/deleteAttendances")
-  .delete(
-    authenticateToken,
-    isTeacher,
-    attendanceController.deactivateManyAttendances
-  ); // Delete a specific attendance record
 
 module.exports = router;

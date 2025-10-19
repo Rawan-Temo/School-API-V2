@@ -16,9 +16,6 @@ router
   .post(authenticateToken, isAdmin, timeTableController.addTimeTable);
 
 router
-  .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, timeTableController.deactivateTimeTable);
-router
   .route("/time-filter")
   .get(authenticateToken, isStudent, timeTableController.timeResults);
 router
@@ -28,6 +25,10 @@ router
     isAdmin,
     timeTableController.deactivateManyTimeTables
   );
+
+router
+  .route("/deactivate/:id")
+  .patch(authenticateToken, isAdmin, timeTableController.deactivateTimeTable);
 
 router
   .route("/:id")

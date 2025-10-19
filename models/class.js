@@ -1,24 +1,24 @@
 const mongoose = require("mongoose");
 
-const classSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  }, // e.g., "Room 101"
-  yearLevel: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 12,
-  }, // 1-12
-  active: {
-    type: Boolean,
-    default: true,
+const classSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    }, // e.g., "Room 101"
+
+    active: {
+      type: Boolean,
+      default: true,
+    },
   },
-});
+  {
+    timestamps: true,
+  }
+);
 
 classSchema.index(
-  { yearLevel: 1, name: 1 },
+  { name: 1 },
   { unique: true, partialFilterExpression: { active: true } }
 );
 const Class = mongoose.model("Class", classSchema);

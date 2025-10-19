@@ -14,25 +14,20 @@ router
   .get(authenticateToken, examResultController.allResults)
   .post(authenticateToken, examResultController.addResult);
 router
-  .route("/details/:id")
-  .get(authenticateToken, isStudent, examResultController.detailedResults);
-router.get(
-  "/search/:id",
-  authenticateToken,
-  isAdmin,
-  examResultController.search
-);
-
-router
-  .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, examResultController.deactivateResult);
-router
   .route("/deactivate-many")
   .patch(
     authenticateToken,
     isAdmin,
     examResultController.deactivateManyResults
   );
+
+router
+  .route("/details/:id")
+  .get(authenticateToken, isStudent, examResultController.detailedResults);
+
+router
+  .route("/deactivate/:id")
+  .patch(authenticateToken, isAdmin, examResultController.deactivateResult);
 
 router
   .route("/:id")

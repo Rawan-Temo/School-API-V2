@@ -25,12 +25,7 @@ router
   .get(authenticateToken, isTeacher, studentController.getAllStudents)
   .post(authenticateToken, isAdmin, studentController.addStudent);
 // router.route("/delete/:id").delete(studentController.deleteStudentFinally);
-router.get(
-  "/search/:id",
-  authenticateToken,
-  isTeacher,
-  studentController.search
-);
+
 router
   .route("/deactivate/:id")
   .patch(authenticateToken, isAdmin, studentController.deactivateStudent);
@@ -39,7 +34,7 @@ router
   .patch(authenticateToken, isAdmin, studentController.incrementYear);
 router
   .route("/:id")
-  .get(authenticateToken,  isStudent,   studentController.getAStudent)
-  .patch(authenticateToken,  isAdmin, studentController.updateStudent);
+  .get(authenticateToken, isStudent, studentController.getAStudent)
+  .patch(authenticateToken, isAdmin, studentController.updateStudent);
 
 module.exports = router;

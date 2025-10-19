@@ -15,11 +15,12 @@ router
   .post(authenticateToken, isAdmin, examController.addExam);
 
 router
-  .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, examController.deactivateExam);
-router
   .route("/deactivate-many")
   .patch(authenticateToken, isAdmin, examController.deactivateManyExams);
+
+router
+  .route("/deactivate/:id")
+  .patch(authenticateToken, isAdmin, examController.deactivateExam);
 
 router
   .route("/:id")
