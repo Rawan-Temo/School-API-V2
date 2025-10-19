@@ -9,7 +9,7 @@ const path = require("path");
 
 // Import routers
 const teacherRouter = require("./routes/teacherRouter.js");
-const subjectRouter = require("./routes/subjectRouter.js");
+const courseRouter = require("./routes/subjectRouter.js");
 const classRouter = require("./routes/classRouter.js");
 const studentRouter = require("./routes/studentRouter.js");
 const attendanceRouter = require("./routes/attendanceRouter.js");
@@ -34,7 +34,7 @@ app.use(helmet()); // Security middleware
 app.use("/api/students", studentRouter);
 app.use("/api/teachers", teacherRouter);
 app.use("/api/classes", classRouter);
-app.use("/api/subjects", subjectRouter);
+app.use("/api/courses", courseRouter);
 app.use("/api/attendances", attendanceRouter);
 app.use("/api/exams", examRouter);
 app.use("/api/exam-results", examResultsRouter);
