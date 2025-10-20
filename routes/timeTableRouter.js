@@ -8,31 +8,25 @@ const {
   isStudent,
 } = require("../middlewares/authMiddleware.js");
 
-router.get("/count", authenticateToken, isAdmin, timeTableController.countData);
-
 router
   .route("/")
-  .get(authenticateToken, isStudent, timeTableController.allTimeTables)
-  .post(authenticateToken, isAdmin, timeTableController.addTimeTable);
+  .get(authenticateToken, isStudent, timeTableController.getAll)
+  .post(authenticateToken, isAdmin, timeTableController.createOne);
 
-router
-  .route("/time-filter")
-  .get(authenticateToken, isStudent, timeTableController.timeResults);
 router
   .route("/deactivate-many")
-  .patch(
-    authenticateToken,
-    isAdmin,
-    timeTableController.deactivateManyTimeTables
-  );
-
+  .patch(authenticateToken, isAdmin, timeTableController.deactivateMany);
+router
+  .route("/delete-many")
+  .patch(authenticateToken, isAdmin, timeTableController.deleteMany);
 router
   .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, timeTableController.deactivateTimeTable);
+  .patch(authenticateToken, isAdmin, timeTableController.deactivateOne);
 
 router
   .route("/:id")
-  .get(authenticateToken, isStudent, timeTableController.aTimeTable)
-  .patch(authenticateToken, isAdmin, timeTableController.updateTimeTable);
+  .get(authenticateToken, isStudent, timeTableController.getOneById)
+  .patch(authenticateToken, isAdmin, timeTableController.updateOne)
+  .delete(authenticateToken, isAdmin, timeTableController.deleteOne);
 
 module.exports = router;

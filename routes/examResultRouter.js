@@ -11,27 +11,25 @@ router.get("/count", examResultController.countData);
 
 router
   .route("/")
-  .get(authenticateToken, examResultController.allResults)
-  .post(authenticateToken, examResultController.addResult);
-router
-  .route("/deactivate-many")
-  .patch(
-    authenticateToken,
-    isAdmin,
-    examResultController.deactivateManyResults
-  );
+  .get(authenticateToken, examResultController.getAll)
+  .post(authenticateToken, examResultController.createOne);
 
 router
-  .route("/details/:id")
-  .get(authenticateToken, isStudent, examResultController.detailedResults);
+  .route("/deactivate-many")
+  .patch(authenticateToken, isAdmin, examResultController.deactivateMany);
+
+router
+  .route("/delete-many")
+  .patch(authenticateToken, isAdmin, examResultController.deleteMany);
 
 router
   .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, examResultController.deactivateResult);
+  .patch(authenticateToken, isAdmin, examResultController.deactivateOne);
 
 router
   .route("/:id")
-  .get(authenticateToken, isAdmin, examResultController.aResult)
-  .patch(authenticateToken, isAdmin, examResultController.updateResult);
+  .get(authenticateToken, isAdmin, examResultController.getOneById)
+  .patch(authenticateToken, isAdmin, examResultController.updateOne)
+  .delete(authenticateToken, isAdmin, examResultController.deleteOne);
 
 module.exports = router;

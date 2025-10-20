@@ -11,20 +11,24 @@ router.get("/count", authenticateToken, isStudent, examController.countData);
 
 router
   .route("/")
-  .get(authenticateToken, isStudent, examController.allExams)
-  .post(authenticateToken, isAdmin, examController.addExam);
+  .get(authenticateToken, isStudent, examController.getAll)
+  .post(authenticateToken, isAdmin, examController.createOne);
 
 router
   .route("/deactivate-many")
-  .patch(authenticateToken, isAdmin, examController.deactivateManyExams);
+  .patch(authenticateToken, isAdmin, examController.deactivateMany);
 
 router
+  .route("/delete-many")
+  .patch(authenticateToken, isAdmin, examController.deleteMany);
+router
   .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, examController.deactivateExam);
+  .patch(authenticateToken, isAdmin, examController.deactivateOne);
 
 router
   .route("/:id")
-  .get(authenticateToken, examController.anExam)
-  .patch(authenticateToken, isAdmin, examController.updateExam);
+  .get(authenticateToken, examController.getOneById)
+  .patch(authenticateToken, isAdmin, examController.updateOne)
+  .delete(authenticateToken, isAdmin, examController.deleteOne);
 
 module.exports = router;

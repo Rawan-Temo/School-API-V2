@@ -31,6 +31,6 @@ const examSchema = new mongoose.Schema(
   }
 );
 // Composite unique index on date, classId, and yearLevel to prevent overlapping exams
-
+examSchema.index({ courseId: 1 });
 const Exam = mongoose.model("Exam", examSchema);
 module.exports = Exam;

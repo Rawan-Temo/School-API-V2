@@ -1,6 +1,6 @@
 const Quiz = require("../models/quiz.js");
 const apiFeatures = require("../utils/apiFeatures");
-
+//TODO fix and test the new logic of quizzes
 const getAllQuizzes = async (req, res) => {
   try {
     // Initialize the API features for filtered, sorted, and paginated quiz data
@@ -11,7 +11,7 @@ const getAllQuizzes = async (req, res) => {
           populate: { path: "choices" },
         })
         .populate("classId") // Populate the Class document
-        .populate("subjectId"), // Populate the Subject document
+        .populate("courseId"), // Populate the Subject document
       req.query
     )
       .filter()
@@ -47,7 +47,7 @@ const getAllQuizzes = async (req, res) => {
 const getQuizById = async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id).populate(
-      "classId subjectId"
+      "classId courseId"
     );
     if (!quiz) {
       return res

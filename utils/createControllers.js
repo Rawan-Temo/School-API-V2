@@ -24,7 +24,6 @@ const createController = (Model, modelName, searchFields, populate = "") => {
     }
     try {
       const parsedQuery = buildParsedQuery(req.query);
-
       let query = Model.find();
       if (populate) {
         query = query.populate(populate);
@@ -198,6 +197,40 @@ const createController = (Model, modelName, searchFields, populate = "") => {
       });
     }
   };
+  const deleteMany = async (req, res) => {
+    try {
+      const Ids = req.body.data.ids;
+      let result;
+
+      // Validate input
+      if (!Ids || !Array.isArray(Ids) || Ids.length === 0) {
+        return res.status(400).json({
+          status: "fail",
+          message: "Invalid input: 'ids' must be a non-empty array.",
+        });
+      }
+      result = await Model.deleteMany(
+        { _id: { $in: Ids } } // Match documents with IDs in the array
+      );
+
+      // Check if any documents were modified
+      if (result.deletedCount === 0) {
+        return res.status(404).json({
+          status: "fail",
+          message: `${Ids.length} Ids provided, but no matches found or they were already deleted.`,
+        });
+      }
+
+      // Step 2: Return success response
+      return res.status(200).json({
+        status: "success",
+        message: ` ${Ids.length}  deleted successfully.`,
+        data: null,
+      });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  };
 
   return {
     getAll,
@@ -207,6 +240,7 @@ const createController = (Model, modelName, searchFields, populate = "") => {
     deactivateOne,
     deleteOne,
     deactivateMany,
+    deleteMany,
   };
 };
 

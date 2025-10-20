@@ -11,15 +11,24 @@ router.get("/count", authenticateToken, isAdmin, adminController.countData);
 
 router
   .route("/")
-  .get(authenticateToken, isAdmin, adminController.getAllAdmins)
-  .post(authenticateToken, isAdmin, adminController.addAdmin);
-// router.route("/delete/:id").delete(studentController.deleteStudentFinally);
+  .get(authenticateToken, isAdmin, adminController.getAll)
+  .post(authenticateToken, isAdmin, adminController.createOne);
+
+router
+  .route("/deactivate-many")
+  .patch(authenticateToken, isAdmin, adminController.deactivateMany);
+
+router
+  .route("/delete-many")
+  .patch(authenticateToken, isAdmin, adminController.deleteMany);
+
 router
   .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, adminController.deactivateAdmin);
+  .patch(authenticateToken, isAdmin, adminController.deactivateOne);
 
 router
   .route("/:id")
-  .get(authenticateToken, isAdmin, adminController.getAnAdmin)
-  .patch(authenticateToken, isAdmin, adminController.updateAdmin);
+  .get(authenticateToken, isAdmin, adminController.getOneById)
+  .patch(authenticateToken, isAdmin, adminController.updateOne)
+  .delete(authenticateToken, isAdmin, adminController.deleteOne);
 module.exports = router;

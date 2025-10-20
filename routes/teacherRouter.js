@@ -7,30 +7,28 @@ const {
   isTeacher,
   isStudent,
 } = require("../middlewares/authMiddleware.js");
-router.get("/count-teachers", authenticateToken, teacherController.countData);
-router.get("/count-gender", authenticateToken, teacherController.countGender);
 
 router
-  .route("/details")
-  .get(
-    authenticateToken,
-    isTeacher,
-    teacherController.getAllTeachersWithDetails
-  );
-router
-  .route("/deleteTeachers")
-  .patch(authenticateToken, isAdmin, teacherController.deActivateManyTeachers);
-router
   .route("/")
-  .get(authenticateToken, isTeacher, teacherController.getAllTeachers)
-  .post(authenticateToken, isAdmin, teacherController.addTeacher);
+  .get(authenticateToken, isTeacher, teacherController.getAll)
+  .post(authenticateToken, isAdmin, teacherController.createOne);
 // router.route("/delete/:id").delete(teacherController.deActivateManyTeachers);
+
+router
+  .route("/deactivate-many")
+  .patch(authenticateToken, isAdmin, teacherController.deactivateMany);
+
+router
+  .route("/delete-many")
+  .patch(authenticateToken, isAdmin, teacherController.deleteMany);
+
 router
   .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, teacherController.deactivateTeacher);
+  .patch(authenticateToken, isAdmin, teacherController.deactivateOne);
 router
   .route("/:id")
-  .get(authenticateToken, isTeacher, teacherController.getATeacher)
-  .patch(authenticateToken, isAdmin, teacherController.updateTeacher);
+  .get(authenticateToken, isTeacher, teacherController.getOneById)
+  .patch(authenticateToken, isAdmin, teacherController.updateOne)
+  .delete(authenticateToken, isAdmin, teacherController.deleteOne);
 
 module.exports = router;

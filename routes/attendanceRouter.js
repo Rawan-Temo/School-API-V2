@@ -17,33 +17,26 @@ router.get(
 // Route for all attendance records
 router
   .route("/")
-  .get(authenticateToken, isTeacher, attendanceController.getAllAttendances) // Get all attendance records
-  .post(authenticateToken, isTeacher, attendanceController.addAttendance); // Add a new attendance record
-router
-  .route("/time-filter")
-  .get(authenticateToken, isTeacher, attendanceController.timeResults);
+  .get(authenticateToken, isTeacher, attendanceController.getAll) // Get all attendance records
+  .post(authenticateToken, isTeacher, attendanceController.createOne); // Add a new attendance record
 
 router
-  .route("/deleteAttendances")
-  .delete(
-    authenticateToken,
-    isTeacher,
-    attendanceController.deactivateManyAttendances
-  ); // Delete a specific attendance record
+  .route("/deactivate-many")
+  .patch(authenticateToken, isTeacher, attendanceController.deactivateMany);
+
+router
+  .route("/delete-many")
+  .patch(authenticateToken, isTeacher, attendanceController.deleteMany);
 // Route for specific attendance records by ID
 router
   .route("/:id")
-  .get(authenticateToken, isTeacher, attendanceController.getAttendance) // Get a specific attendance record
-  .patch(authenticateToken, isTeacher, attendanceController.updateAttendance); // Update a specific attendance record
+  .get(authenticateToken, isTeacher, attendanceController.getOneById) // Get a specific attendance record
+  .patch(authenticateToken, isTeacher, attendanceController.updateOne); // Update a specific attendance record
 
 // Route to deactivate an attendance record by ID
 router
   .route("/deactivate/:id")
-  .patch(
-    authenticateToken,
-    isTeacher,
-    attendanceController.deactivateAttendance
-  ); // Change PATCH to match HTTP conventions
+  .patch(authenticateToken, isTeacher, attendanceController.deactivateOne); // Change PATCH to match HTTP conventions
 
 // Route to delete an attendance record by ID
 

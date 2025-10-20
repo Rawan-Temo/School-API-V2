@@ -6,9 +6,9 @@ const timetableSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Class", // Reference to the Class model
     },
-    subjectId: {
+    courseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Subject", // Reference to the Subject model
+      ref: "Course", // Reference to the Course model
     },
     dayOfWeek: {
       type: String,
@@ -39,7 +39,7 @@ const timetableSchema = new mongoose.Schema(
 
 // Create a unique partial index on active timetables
 timetableSchema.index(
-  { class: 1, subject: 1, dayOfWeek: 1, startTime: 1 },
+  { classId: 1, courseId: 1, dayOfWeek: 1, startTime: 1 },
   { unique: true, partialFilterExpression: { active: true } }
 );
 

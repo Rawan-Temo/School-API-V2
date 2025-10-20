@@ -28,9 +28,9 @@ const questionSchema = new mongoose.Schema({
 const quizSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
-    subjectId: {
+    courseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Subject", // Reference to the Subject model
+      ref: "Course", // Reference to the Course model
     },
     classId: {
       type: mongoose.Schema.Types.ObjectId,

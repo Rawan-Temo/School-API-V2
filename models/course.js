@@ -31,7 +31,7 @@ courseSchema.index(
   { code: 1 },
   { unique: true, partialFilterExpression: { active: true } }
 );
-courseSchema.index({ name: "text", description: "text" });
+courseSchema.index({ teacherId: 1 });
 
 const Course = mongoose.model("Course", courseSchema);
 

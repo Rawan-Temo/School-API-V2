@@ -16,9 +16,6 @@ const examResultSchema = new mongoose.Schema(
       refPath: "type", // Reference to the Exam model
       required: true,
     },
-    studentName: {
-      type: String, // Denormalized field for fuzzy search
-    },
     score: {
       type: Number,
       required: true,
@@ -35,7 +32,7 @@ const examResultSchema = new mongoose.Schema(
 
 // Create the ExamResult model
 // Create a compound index to ensure that the combination of student and exam is unique
-examResultSchema.index({ student: 1, exam: 1 }, { unique: true });
+examResultSchema.index({ studentId: 1, examId: 1 }, { unique: true });
 
 const ExamResult = mongoose.model("ExamResult", examResultSchema);
 module.exports = ExamResult;
