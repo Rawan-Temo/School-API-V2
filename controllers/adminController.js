@@ -1,6 +1,4 @@
 const Admin = require("../models/admin");
-const apiFeatures = require("../utils/apiFeatures");
-const User = require("../models/user");
 const createController = require("../utils/createControllers");
 // Get all admin s
 const adminController = createController(Admin, "Admin", ["name", "email"]);

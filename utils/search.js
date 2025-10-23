@@ -12,26 +12,32 @@ const search = async (model, fields, populate, req, res) => {
       });
     }
 
-    // Perform fuzzy search with dynamic fields
     const tokens = query.split(/\s+/).map((word) => new RegExp(word, "i")); // Split the query into tokens
 
-    // Dynamically create the $or query for all fields
-    const searchConditions = tokens.map((token) => ({
-      $or: fields.map((field) => ({ [field]: token })), // Create a $or condition for each token and field
-    }));
+    const searchConditions = tokens.map((token) => {
+      return {
+        $or: fields.map((field) => {
+          console.log("Searching field:", field, "for token:", token);
+          return { [field]: token };
+        }), // Create a $or condition for each token and field
+      };
+    });
     let populateObject = populate;
     try {
-      // Try evaluating the populate string as an object
       populateObject = eval(`(${populate})`);
     } catch (err) {
       // If evaluation fails, fallback to the string as it is
     }
 
+    console.log(
+      "Search conditions:",
+      JSON.stringify(searchConditions, null, 2)
+    );
     // Define the features query
     let features = new APIFeatures(
       model
         .find({
-          $and: searchConditions, // Ensure all tokens are matched across any of the specified fields
+          $and: searchConditions,
         })
         .populate(populateObject || ""),
       req.query
@@ -69,6 +75,5 @@ const search = async (model, fields, populate, req, res) => {
     });
   }
 };
-
 
 module.exports = { search };

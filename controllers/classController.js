@@ -1,7 +1,7 @@
 const ClassModel = require("../models/class");
 const createController = require("../utils/createControllers");
 
-const classController = createController(Class, "class", "name");
+const classController = createController(ClassModel, "class", ["name"]);
 const countData = async (req, res) => {
   try {
     const filter = {};

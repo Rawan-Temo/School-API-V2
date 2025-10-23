@@ -1,5 +1,5 @@
 const User = require("../models/user");
-const apiFeatures = require("../utils/apiFeatures"); // For filtering, sorting, etc.
+const createController = require("../utils/createControllers"); // For filtering, sorting, etc.
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.ACCESS_TOKEN_SECRET;
@@ -7,48 +7,10 @@ const Teacher = require("../models/teacher");
 const Student = require("../models/student");
 const Admin = require("../models/admin");
 // Get all users
-const getAllUsers = async (req, res) => {
-  try {
-    const features = new apiFeatures(User.find(), req.query)
-      .sort()
-      .filter()
-      .limitFields()
-      .paginate();
-
-    const users = await features.query;
-    const numverOfAcriveUsers = await User.countDocuments();
-
-    res.status(200).json({
-      status: "success",
-      numverOfAcriveUsers,
-      results: users.length,
-      data: users,
-    });
-  } catch (error) {
-    res.status(400).json({ status: "fail", message: error.message });
-  }
-};
-
-// Get a single user by ID
-const getAUser = async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ status: "fail", message: "User not found" });
-    }
-
-    res.status(200).json({
-      status: "success",
-      data: user,
-    });
-  } catch (error) {
-    res.status(400).json({ status: "fail", message: error.message });
-  }
-};
+const userController = createController(User, "user", [
+  "username",
+  "profileId",
+]);
 
 const createUser = async (req, res) => {
   try {
@@ -116,26 +78,6 @@ const createUser = async (req, res) => {
   }
 };
 
-// Delete a user by ID
-const deleteAUser = async (req, res) => {
-  try {
-    const userId = req.params.id;
-    const user = await User.findByIdAndDelete(userId);
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ status: "fail", message: "User not found" });
-    }
-
-    res.status(204).json({
-      status: "success",
-      data: null,
-    });
-  } catch (error) {
-    res.status(400).json({ status: "fail", message: error.message });
-  }
-};
 const login = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -182,10 +124,9 @@ const userProfile = async (req, res) => {
   }
 };
 module.exports = {
-  getAllUsers,
-  getAUser,
+  ...userController,
   createUser,
-  deleteAUser,
+
   login,
   countData,
   userProfile,

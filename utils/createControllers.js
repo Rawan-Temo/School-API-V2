@@ -19,7 +19,7 @@ const createController = (Model, modelName, searchFields, populate = "") => {
   // Get all documents
   const getAll = async (req, res) => {
     if (req.query.search) {
-      await search(Model, [`${searchFields}`], populate, req, res);
+      await search(Model, searchFields, populate, req, res);
       return;
     }
     try {

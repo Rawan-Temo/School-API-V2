@@ -6,10 +6,11 @@ const helmet = require("helmet"); // For security enhancements
 const app = express();
 const port = process.env.PORT || 8000;
 const path = require("path");
+const rateLimit = require("express-rate-limit");
 
 // Import routers
 const teacherRouter = require("./routes/teacherRouter.js");
-const courseRouter = require("./routes/subjectRouter.js");
+const courseRouter = require("./routes/courseRouter.js");
 const classRouter = require("./routes/classRouter.js");
 const studentRouter = require("./routes/studentRouter.js");
 const attendanceRouter = require("./routes/attendanceRouter.js");
@@ -28,7 +29,22 @@ app.use(express.json()); // Built-in JSON parser
 app.use(cors());
 app.use(morgan(process.env.NODE_ENV === "production" ? "tiny" : "dev"));
 app.use(helmet()); // Security middleware
-
+app.use(
+  "/api/",
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 500, // limit each IP to 500 requests per windowMs
+    message: "Too many requests from this IP, please try again later.",
+  })
+);
+app.use(
+  "/api/users/login",
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: "Too many requests from this IP, please try again later.",
+  })
+);
 // API Routes
 // 404 Handler
 app.use("/api/students", studentRouter);

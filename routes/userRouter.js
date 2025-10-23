@@ -12,11 +12,11 @@ router.route("/profile").get(authenticateToken, userController.userProfile);
 router.route("/login").post(userController.login);
 router
   .route("/")
-  .get(authenticateToken, isAdmin, userController.getAllUsers)
+  .get(authenticateToken, isAdmin, userController.getAll)
   .post(authenticateToken, isAdmin, userController.createUser);
 
 router
   .route("/:id")
-  .get(authenticateToken, isAdmin, userController.getAUser)
-  .delete(authenticateToken, isAdmin, userController.deleteAUser);
+  .get(authenticateToken, isAdmin, userController.getOneById)
+  .delete(authenticateToken, isAdmin, userController.deleteOne);
 module.exports = router;

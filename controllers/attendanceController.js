@@ -22,6 +22,5 @@ const countData = async (req, res) => {
 };
 module.exports = {
   ...attendanceController,
-  timeResults,
   countData,
 };
