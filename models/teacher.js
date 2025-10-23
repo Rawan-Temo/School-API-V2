@@ -25,7 +25,6 @@ const teacherSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      required: true,
     },
     active: {
       type: Boolean,
@@ -42,7 +41,6 @@ teacherSchema.index(
   { email: 1 },
   { unique: true, partialFilterExpression: { active: true } }
 );
-teacherSchema.index({ firstName: "text", lastName: "text" });
 
 const Teacher = mongoose.model("Teacher", teacherSchema);
 

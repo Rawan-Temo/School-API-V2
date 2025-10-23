@@ -11,7 +11,7 @@ const getAllQuizzes = async (req, res) => {
           populate: { path: "choices" },
         })
         .populate("classId") // Populate the Class document
-        .populate("courseId"), // Populate the Subject document
+        .populate("courseId"), 
       req.query
     )
       .filter()
