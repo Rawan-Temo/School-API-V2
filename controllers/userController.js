@@ -7,10 +7,12 @@ const Teacher = require("../models/teacher");
 const Student = require("../models/student");
 const Admin = require("../models/admin");
 // Get all users
-const userController = createController(User, "user", [
-  "username",
-  "profileId",
-]);
+const userController = createController(
+  User,
+  "user",
+  ["username"],
+  ["profileId"]
+);
 
 const createUser = async (req, res) => {
   try {

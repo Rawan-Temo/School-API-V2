@@ -14,14 +14,9 @@ const search = async (model, fields, populate, req, res) => {
 
     const tokens = query.split(/\s+/).map((word) => new RegExp(word, "i")); // Split the query into tokens
 
-    const searchConditions = tokens.map((token) => {
-      return {
-        $or: fields.map((field) => {
-          console.log("Searching field:", field, "for token:", token);
-          return { [field]: token };
-        }), // Create a $or condition for each token and field
-      };
-    });
+    const searchConditions = tokens.map((token) => ({
+      $or: fields.map((field) => ({ [field]: token })),
+    }));
     let populateObject = populate;
     try {
       populateObject = eval(`(${populate})`);

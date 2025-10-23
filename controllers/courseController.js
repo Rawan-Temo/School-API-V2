@@ -3,9 +3,12 @@ const createController = require("../utils/createControllers");
 // Get default controllers for
 // Course model
 
-const courseController = createController(Course, "course", "name", [
-  "teacherId",
-]);
+const courseController = createController(
+  Course,
+  "course",
+  ["name", "code"],
+  ["teacherId"]
+);
 
 const countData = async (req, res) => {
   try {
