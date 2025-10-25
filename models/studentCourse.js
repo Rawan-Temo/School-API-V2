@@ -21,8 +21,5 @@ const studentCourseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index to ensure a student can't be enrolled in the same course multiple times when active
-studentCourseSchema.index({ studentId: 1, courseId: 1 }, { unique: true });
-
 const StudentCourse = mongoose.model("StudentCourse", studentCourseSchema);
 module.exports = StudentCourse;

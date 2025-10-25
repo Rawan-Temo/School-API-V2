@@ -39,6 +39,13 @@ const createController = (Model, modelName, searchFields, populate = "") => {
         features.query.lean(),
         Model.countDocuments(parsedQuery),
       ]);
+      // temp way of doing this not ideal need a better way
+      
+      if (modelName === "user") {
+        docs.forEach((doc) => {
+          doc.password = undefined; // Exclude password from the response
+        });
+      }
 
       res.status(200).json({
         status: "success",

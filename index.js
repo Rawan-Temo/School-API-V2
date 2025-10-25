@@ -20,6 +20,7 @@ const timeTableRouter = require("./routes/timeTableRouter.js");
 const adminRouter = require("./routes/adminRouter.js");
 const userRouter = require("./routes/userRouter.js");
 const quizRouter = require("./routes/quizRouter.js");
+const studentCourseRouter = require("./routes/studentCourseRouter.js");
 // Import and initialize database connection
 const connection = require("./db");
 connection();
@@ -58,6 +59,7 @@ app.use("/api/time-table", timeTableRouter);
 app.use("/api/quizzes", quizRouter);
 app.use("/api/admins", adminRouter);
 app.use("/api/users", userRouter);
+app.use("/api/student-courses", studentCourseRouter);
 
 app.use(express.static(path.join(__dirname, "../client/build"))); // Make sure this path is correct
 app.get("*", (req, res) => {
