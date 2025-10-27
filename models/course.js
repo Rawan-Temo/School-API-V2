@@ -8,6 +8,8 @@ const courseSchema = new mongoose.Schema(
     },
     code: {
       type: String,
+      required: true,
+
       trim: true,
     },
     teacherId: [
@@ -27,10 +29,7 @@ const courseSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-courseSchema.index(
-  { code: 1 },
-  { unique: true, partialFilterExpression: { active: true } }
-);
+
 courseSchema.index({ teacherId: 1 });
 
 const Course = mongoose.model("Course", courseSchema);
