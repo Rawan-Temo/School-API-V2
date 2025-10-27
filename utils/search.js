@@ -51,14 +51,14 @@ const search = async (model, fields, populate, req, res) => {
     ).filter();
 
     // Execute the query to fetch paginated results
-    let [results, numberOfActiveResults] = await Promise.all([
+    let [results, total] = await Promise.all([
       features.query.lean(),
       totalResults.query.countDocuments(),
     ]);
     // Return the response
     return res.status(200).json({
       status: "success",
-      numberOfActiveResults, // Total number of results found
+      total, // Total number of results found
       results: results.length, // Number of results in the current page
       data: results, // The matching documents
     });
