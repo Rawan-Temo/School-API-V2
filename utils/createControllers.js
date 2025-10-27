@@ -40,10 +40,11 @@ const createController = (Model, modelName, searchFields, populate = "") => {
         Model.countDocuments(parsedQuery),
       ]);
       // temp way of doing this not ideal need a better way
-      
+
       if (modelName === "user") {
         docs.forEach((doc) => {
           doc.password = undefined; // Exclude password from the response
+          doc.refreshToken = undefined; // Exclude refreshToken from the response
         });
       }
 

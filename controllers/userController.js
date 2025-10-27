@@ -3,6 +3,7 @@ const createController = require("../utils/createControllers"); // For filtering
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.ACCESS_TOKEN_SECRET;
+const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
 const Teacher = require("../models/teacher");
 const Student = require("../models/student");
 const Admin = require("../models/admin");
@@ -192,7 +193,7 @@ const logout = async (req, res) => {
   }
 
   res.clearCookie("refreshToken");
-  res.json({ message: "Logged out successfully" });
+  res.status(200).json({ message: "Logged out successfully" });
 };
 module.exports = {
   ...userController,

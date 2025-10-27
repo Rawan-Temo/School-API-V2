@@ -23,11 +23,20 @@ const quizRouter = require("./routes/quizRouter.js");
 const studentCourseRouter = require("./routes/studentCourseRouter.js");
 // Import and initialize database connection
 const connection = require("./db");
+const cookieParser = require("cookie-parser");
 connection();
 
 // Middleware
 app.use(express.json()); // Built-in JSON parser
-app.use(cors());
+app.use(cookieParser());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    credentials: true,
+    //it chokes on 204
+    optionsSuccessStatus: 200,
+  })
+);
 app.use(morgan(process.env.NODE_ENV === "production" ? "tiny" : "dev"));
 app.use(helmet()); // Security middleware
 app.use(
