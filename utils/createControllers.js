@@ -174,13 +174,13 @@ const createController = (Model, modelName, searchFields, populate = "") => {
           message: "Invalid input: 'ids' must be a non-empty array.",
         });
       }
-
-      result = await Model.deleteMany(
-        { _id: { $in: Ids } } // Match documents with IDs in the array
+      result = await Model.updateMany(
+        { _id: { $in: Ids } }, // Match documents with IDs in the array
+        { $set: { active: false } } // Soft delete by setting 'active' to false
       );
 
       // Check if any documents were modified
-      if (result.deletedCount === 0) {
+      if (result.modifiedCount === 0) {
         return res.status(404).json({
           status: "fail",
           message: `${Ids.length} Ids provided, but no matches found or they were already deactivated.`,
