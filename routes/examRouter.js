@@ -4,7 +4,6 @@ const examController = require("../controllers/examController.js");
 const {
   authenticateToken,
   isAdmin,
-  isTeacher,
   isStudent,
 } = require("../middlewares/authMiddleware.js");
 router.get("/count", authenticateToken, isStudent, examController.countData);
@@ -27,7 +26,7 @@ router
 
 router
   .route("/:id")
-  .get(authenticateToken, examController.getOneById)
+  .get(authenticateToken, isStudent, examController.getOneById)
   .patch(authenticateToken, isAdmin, examController.updateOne)
   .delete(authenticateToken, isAdmin, examController.deleteOne);
 

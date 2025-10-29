@@ -4,7 +4,6 @@ const courseController = require("../controllers/courseController.js");
 const {
   authenticateToken,
   isAdmin,
-  isTeacher,
   isStudent,
 } = require("../middlewares/authMiddleware.js");
 router.get("/count", authenticateToken, courseController.countData);

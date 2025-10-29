@@ -6,6 +6,8 @@ const {
   isAdmin,
   isTeacher,
   isStudent,
+  attachTeacherQuery,
+  attachTeacherBody,
 } = require("../middlewares/authMiddleware.js");
 router.get(
   "/count",
@@ -17,26 +19,43 @@ router.get(
 // Route for all attendance records
 router
   .route("/")
-  .get(authenticateToken, isTeacher, attendanceController.getAll) // Get all attendance records
-  .post(authenticateToken, isTeacher, attendanceController.createOne); // Add a new attendance record
+  .get(
+    authenticateToken,
+    isTeacher,
+    attachTeacherQuery,
+    attendanceController.getAll
+  ) // Get all attendance records
+  .post(
+    authenticateToken,
+    isTeacher,
+    attachTeacherBody,
+    attendanceController.createOne
+  ); // Add a new attendance record
 
-router
-  .route("/deactivate-many")
-  .patch(authenticateToken, isTeacher, attendanceController.deactivateMany);
-
-router
-  .route("/delete-many")
-  .patch(authenticateToken, isTeacher, attendanceController.deleteMany);
+router.route("/delete-many").patch(
+  authenticateToken,
+  isTeacher,
+  attachTeacherQuery,
+  //TODO CHeck if teacher can delete these records
+  attendanceController.deleteMany
+);
 // Route for specific attendance records by ID
 router
   .route("/:id")
-  .get(authenticateToken, isTeacher, attendanceController.getOneById) // Get a specific attendance record
-  .patch(authenticateToken, isTeacher, attendanceController.updateOne); // Update a specific attendance record
+  .get(
+    authenticateToken,
+    isTeacher,
+    attachTeacherQuery,
+    attendanceController.getOneById
+  ) // Get a specific attendance record
+  .patch(
+    authenticateToken,
+    attachTeacherBody,
+    isTeacher,
+    attendanceController.updateAttendance
+  ); // Update a specific attendance record
 
 // Route to deactivate an attendance record by ID
-router
-  .route("/deactivate/:id")
-  .patch(authenticateToken, isTeacher, attendanceController.deactivateOne); // Change PATCH to match HTTP conventions
 
 // Route to delete an attendance record by ID
 

@@ -6,13 +6,18 @@ const studentCourseController = require("../controllers/studentCourseController.
 const {
   authenticateToken,
   isAdmin,
-  isTeacher,
   isStudent,
+  attachStudentQuery,
 } = require("../middlewares/authMiddleware.js");
 
 router
   .route("/")
-  .get(authenticateToken, isStudent, studentCourseController.getAll)
+  .get(
+    authenticateToken,
+    isStudent,
+    attachStudentQuery,
+    studentCourseController.getAll
+  )
   .post(authenticateToken, isAdmin, studentCourseController.createOne);
 
 router
@@ -28,7 +33,12 @@ router
 
 router
   .route("/:id")
-  .get(authenticateToken, studentCourseController.getOneById)
+  .get(
+    authenticateToken,
+    isStudent,
+    attachStudentQuery,
+    studentCourseController.getOneById
+  )
   .patch(authenticateToken, isAdmin, studentCourseController.updateOne)
   .delete(authenticateToken, isAdmin, studentCourseController.deleteOne);
 

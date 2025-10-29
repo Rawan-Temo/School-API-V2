@@ -4,7 +4,6 @@ const timeTableController = require("../controllers/timeTableController.js");
 const {
   authenticateToken,
   isAdmin,
-  isTeacher,
   isStudent,
 } = require("../middlewares/authMiddleware.js");
 

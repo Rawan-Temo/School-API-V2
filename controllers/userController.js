@@ -3,7 +3,7 @@ const createController = require("../utils/createControllers"); // For filtering
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.ACCESS_TOKEN_SECRET;
-const REFRESH_SECRET = process.env.REFRESH_TOKEN_SECRET;
+const REFRESH_SECRET = process.env.REFRESH_SECRET;
 const Teacher = require("../models/teacher");
 const Student = require("../models/student");
 const Admin = require("../models/admin");
@@ -96,7 +96,7 @@ const login = async (req, res) => {
       { id: user._id, role: user.role },
       JWT_SECRET,
       {
-        expiresIn: "15m", // short lifespan
+        expiresIn: "1d", // short lifespan
       }
     );
 

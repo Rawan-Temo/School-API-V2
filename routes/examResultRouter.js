@@ -5,14 +5,14 @@ const {
   authenticateToken,
   isAdmin,
   isTeacher,
-  isStudent,
+  attachStudentQuery,
 } = require("../middlewares/authMiddleware.js");
 router.get("/count", examResultController.countData);
 
 router
   .route("/")
-  .get(authenticateToken, examResultController.getAll)
-  .post(authenticateToken, examResultController.createOne);
+  .get(authenticateToken, attachStudentQuery, examResultController.getAll)
+  .post(authenticateToken, isTeacher, examResultController.createOne);
 
 router
   .route("/deactivate-many")
@@ -28,8 +28,8 @@ router
 
 router
   .route("/:id")
-  .get(authenticateToken, isAdmin, examResultController.getOneById)
-  .patch(authenticateToken, isAdmin, examResultController.updateOne)
+  .get(authenticateToken, examResultController.oneResult)
+  .patch(authenticateToken, isTeacher, examResultController.updateOne)
   .delete(authenticateToken, isAdmin, examResultController.deleteOne);
 
 module.exports = router;

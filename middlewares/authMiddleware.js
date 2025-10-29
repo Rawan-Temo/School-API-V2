@@ -7,7 +7,7 @@ const authenticateToken = async (req, res, next) => {
   if (!token) return res.sendStatus(401); // No token provided
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, user) => {
-    if (err) return res.sendStatus(403); // Invalid token
+    if (err) return res.sendStatus(401); // Invalid token
 
     const foundUser = await User.findById(user.id);
     if (!foundUser) return res.sendStatus(404); // User not found
@@ -40,4 +40,58 @@ const isStudent = async (req, res, next) => {
   }
   res.status(403).json({ message: "Access denied." });
 };
-module.exports = { authenticateToken, isAdmin, isTeacher, isStudent };
+
+const attachStudentQuery = async (req, res, next) => {
+  try {
+    if (req.user.role === "Student") {
+      req.query.studentId = req.user.profileId;
+    }
+    return next();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const attachStudentBody = async (req, res, next) => {
+  try {
+    if (req.user.role === "Teacher") {
+      req.body.teacherId = req.user.profileId;
+    }
+
+    return next();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const attachTeacherQuery = async (req, res, next) => {
+  try {
+    if (req.user.role === "Teacher") {
+      req.query.teacherId = req.user.profileId;
+    }
+
+    return next();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const attachTeacherBody = async (req, res, next) => {
+  try {
+    if (req.user.role === "Teacher") {
+      req.body.teacherId = req.user.profileId;
+    }
+
+    return next();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  authenticateToken,
+  isAdmin,
+  isTeacher,
+  isStudent,
+  attachStudentQuery,
+  attachStudentBody,
+  attachTeacherQuery,
+  attachTeacherBody,
+};

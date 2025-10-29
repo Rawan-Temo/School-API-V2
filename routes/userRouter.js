@@ -3,8 +3,6 @@ const router = express.Router();
 const {
   authenticateToken,
   isAdmin,
-  isTeacher,
-  isStudent,
 } = require("../middlewares/authMiddleware.js");
 const userController = require("../controllers/userController.js");
 router.get("/count", userController.countData);

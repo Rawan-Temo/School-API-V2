@@ -5,7 +5,6 @@ const {
   authenticateToken,
   isAdmin,
   isTeacher,
-  isStudent,
 } = require("../middlewares/authMiddleware.js");
 
 router
@@ -25,6 +24,8 @@ router
 router
   .route("/deactivate/:id")
   .patch(authenticateToken, isAdmin, teacherController.deactivateOne);
+
+// teacher can only access their own data
 router
   .route("/:id")
   .get(authenticateToken, isTeacher, teacherController.getOneById)

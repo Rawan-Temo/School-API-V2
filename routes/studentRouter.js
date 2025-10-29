@@ -6,6 +6,7 @@ const {
   isAdmin,
   isTeacher,
   isStudent,
+  attachStudentQuery,
 } = require("../middlewares/authMiddleware.js");
 
 router
@@ -24,7 +25,6 @@ router
 router
   .route("/deactivate/:id")
   .patch(authenticateToken, isAdmin, studentController.deactivateOne);
-
 router
   .route("/:id")
   .get(authenticateToken, isStudent, studentController.getOneById)

@@ -62,13 +62,6 @@ const createController = (Model, modelName, searchFields, populate = "") => {
   // Create new document
   const createOne = async (req, res) => {
     try {
-      // If there's a file upload, handle the image path
-      if (req.file) {
-        req.body.image = `/${req.file.filename}`;
-      }
-      // note that this not dynamic for now, only works if the field is 'image'
-      // To make it dynamic, you could pass the field name as an additional parameter to createController
-      // and use that instead of hardcoding 'image' here.
       const newDoc = await Model.create(req.body);
       res.status(201).json({
         status: "success",
@@ -82,7 +75,7 @@ const createController = (Model, modelName, searchFields, populate = "") => {
   // Get one by ID
   const getOneById = async (req, res) => {
     try {
-      let query = Model.findById(req.params.id);
+      let query = Model.findOne({ _id: req.params.id, ...req.query });
       if (populate) {
         query = query.populate(populate);
       }
@@ -107,6 +100,7 @@ const createController = (Model, modelName, searchFields, populate = "") => {
         new: true,
         runValidators: true,
       });
+
       if (populate) {
         query = query.populate(populate);
       }
@@ -216,7 +210,7 @@ const createController = (Model, modelName, searchFields, populate = "") => {
         });
       }
       result = await Model.deleteMany(
-        { _id: { $in: Ids } } // Match documents with IDs in the array
+        { _id: { $in: Ids }, ...req.body } // Match documents with IDs in the array
       );
 
       // Check if any documents were modified
