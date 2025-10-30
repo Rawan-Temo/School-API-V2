@@ -1,13 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/adminController.js");
+const { countDocuments } = require("../utils/countDocs.js");
 const {
   authenticateToken,
   isAdmin,
   isTeacher,
   isStudent,
 } = require("../middlewares/authMiddleware.js");
-router.get("/count", authenticateToken, isAdmin, adminController.countData);
+router.get("/count", authenticateToken, isAdmin, countDocuments);
 
 router
   .route("/")
