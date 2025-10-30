@@ -210,7 +210,7 @@ const createController = (Model, modelName, searchFields, populate = "") => {
         });
       }
       result = await Model.deleteMany(
-        { _id: { $in: Ids }, ...req.body } // Match documents with IDs in the array
+        { _id: { $in: Ids } } // Match documents with IDs in the array
       );
 
       // Check if any documents were modified
@@ -224,7 +224,7 @@ const createController = (Model, modelName, searchFields, populate = "") => {
       // Step 2: Return success response
       return res.status(200).json({
         status: "success",
-        message: ` ${Ids.length}  deleted successfully.`,
+        message: ` ${result.deletedCount}  deleted successfully.`,
         data: null,
       });
     } catch (err) {

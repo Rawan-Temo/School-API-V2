@@ -19,41 +19,20 @@ router.get(
 // Route for all attendance records
 router
   .route("/")
-  .get(
-    authenticateToken,
-    isTeacher,
-    attachTeacherQuery,
-    attendanceController.getAll
-  ) // Get all attendance records
-  .post(
-    authenticateToken,
-    isTeacher,
-    attachTeacherBody,
-    attendanceController.createOne
-  ); // Add a new attendance record
+  .get(authenticateToken, isTeacher, attendanceController.getAll) // Get all attendance records
+  .post(authenticateToken, isTeacher, attendanceController.createAttendance); // Add a new attendance record
 
-router.route("/delete-many").patch(
-  authenticateToken,
-  isTeacher,
-  attachTeacherQuery,
-  //TODO CHeck if teacher can delete these records
-  attendanceController.deleteMany
-);
+router
+  .route("/filtered")
+  .get(authenticateToken, isTeacher, attendanceController.allAttendances);
+
+router
+  .route("/delete-many")
+  .patch(authenticateToken, isAdmin, attendanceController.deleteMany);
 // Route for specific attendance records by ID
 router
   .route("/:id")
-  .get(
-    authenticateToken,
-    isTeacher,
-    attachTeacherQuery,
-    attendanceController.getOneById
-  ) // Get a specific attendance record
-  .patch(
-    authenticateToken,
-    attachTeacherBody,
-    isTeacher,
-    attendanceController.updateAttendance
-  ); // Update a specific attendance record
+  .patch(authenticateToken, isTeacher, attendanceController.updateAttendance); // Update a specific attendance record
 
 // Route to deactivate an attendance record by ID
 

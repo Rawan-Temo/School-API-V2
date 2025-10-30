@@ -1,6 +1,10 @@
+const { default: mongoose } = require("mongoose");
 const Attendance = require("../models/attendance");
+const Course = require("../models/course");
+const StudentCourse = require("../models/studentCourse");
 const apiFeatures = require("../utils/apiFeatures");
 const createController = require("../utils/createControllers");
+const APIFeatures = require("../utils/apiFeatures");
 // create default controllers for Attendance model
 
 const attendanceController = createController(Attendance, "attendance", "", [
@@ -22,45 +26,136 @@ const countData = async (req, res) => {
 };
 const updateAttendance = async (req, res) => {
   try {
-    // حل مؤقت بعدين اصلحها
     const attendanceId = req.params.id;
-    const updateData = req.body;
-    const allowedKeys = ["status"];
-    let attendance;
     if (req.user.role === "Teacher") {
-      attendance = await Attendance.findOne({
-        _id: attendanceId,
-        teacherId: req.user.profileId,
-      });
-    } else {
-      attendance = await Attendance.findOne({
-        _id: attendanceId,
-      });
-    }
-    if (!attendance) {
-      return res.status(404).json({ message: "Attendance record not found" });
+      const teacherId = req.user.profileId;
+
+      // find attendance
+      const attendance = await Attendance.findById(attendanceId);
+      if (!attendance) {
+        return res.status(404).json({ message: "Attendance not found" });
+      }
+
+      // find its course
+      const course = await Course.findById(attendance.courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      // verify teacher belongs to course
+      if (
+        !course.teacherId
+          .map((t) => t.toString())
+          .includes(teacherId.toString())
+      ) {
+        return res.status(403).json({ message: "Not allowed" });
+      }
     }
 
-    Object.keys(updateData).forEach((key) => {
-      if (!allowedKeys.includes(key)) {
-        delete updateData[key];
-      }
+    const updated = await Attendance.findByIdAndUpdate(attendanceId, req.body, {
+      new: true,
+      runValidators: true,
     });
 
-    attendance.status = updateData.status || attendance.status;
-    await attendance.save();
+    return res.json(updated);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+const createAttendance = async (req, res) => {
+  try {
+    if (req.user.role === "Teacher") {
+      const teacherId = req.user.profileId;
+      const { courseId } = req.body;
+
+      // verify course exists and teacher belongs to it
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      if (
+        !course.teacherId
+          .map((t) => t.toString())
+          .includes(teacherId.toString())
+      ) {
+        return res.status(403).json({ message: "Not allowed" });
+      }
+    }
+
+    const attendance = await Attendance.create(req.body);
+    return res.status(201).json(attendance);
+  } catch (err) {
+    console.error(err);
+    if (err.code === 11000) {
+      return res.status(400).json({ message: err.message });
+    }
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+const allAttendances = async (req, res) => {
+  try {
+    const { courseId, startDate, endDate } = req.query;
+
+    // Teacher check
+    if (req.user.role === "Teacher") {
+      const teacherId = req.user.id;
+      const course = await Course.findById(courseId);
+      if (!course) return res.status(404).json({ message: "Course not found" });
+      if (
+        !course.teacherId
+          .map((t) => t.toString())
+          .includes(teacherId.toString())
+      )
+        return res.status(403).json({ message: "Not allowed" });
+    }
+
+    // Get all student IDs for this course
+    const students = await StudentCourse.find({ courseId })
+      .sort({ date: -1 })
+      .select("studentId");
+    // Get unique student IDs
+    const studentIds = [
+      ...new Set(students.map((s) => s.studentId.toString())),
+    ];
+    const studentObjectIds = studentIds.map(
+      (id) => new mongoose.Types.ObjectId(id)
+    );
+    console.log(studentObjectIds);
+    // Build query
+    const query = { studentId: { $in: studentObjectIds } };
+
+    // Pagination
+
+    const features = new APIFeatures(
+      Attendance.find(query).populate({
+        path: "studentId",
+        select: "firstName lastName",
+      }),
+      req.query
+    ).filter();
+    const attendances = await features.query;
+
+    console.log(studentObjectIds);
+    console.log(attendances);
 
     res.status(200).json({
       status: "success",
-      message: "Attendance record updated successfully",
-      data: attendance,
+      results: attendances.length,
+      data: attendances,
     });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
   }
 };
+
 module.exports = {
   ...attendanceController,
   countData,
   updateAttendance,
+  createAttendance,
+  allAttendances,
 };

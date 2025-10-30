@@ -28,7 +28,7 @@ router
 
 router
   .route("/:id")
-  .get(authenticateToken, examResultController.oneResult)
+  .get(authenticateToken, attachStudentQuery, examResultController.oneResult)
   .patch(authenticateToken, isTeacher, examResultController.updateOne)
   .delete(authenticateToken, isAdmin, examResultController.deleteOne);
 
