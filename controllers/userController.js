@@ -81,6 +81,35 @@ const createUser = async (req, res) => {
   }
 };
 
+const updatePassword = async (req, res) => {
+  try {
+    const { newPassword, userId } = req.body;
+
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update and save
+    user.password = hashedPassword;
+    await user.save();
+
+    res
+      .status(200)
+      .json({ status: "success", message: "Password updated successfully." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      status: "fail",
+      message: "An error occurred while updating the password.",
+    });
+  }
+};
+
 const login = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -203,4 +232,5 @@ module.exports = {
   logout,
   countData,
   userProfile,
+  updatePassword,
 };

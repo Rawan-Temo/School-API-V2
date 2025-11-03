@@ -10,6 +10,9 @@ router.route("/profile").get(authenticateToken, userController.userProfile);
 router.route("/login").post(userController.login);
 router.route("/refresh-token").post(userController.refreshToken);
 router.route("/logout").post(userController.logout);
+router
+  .route("/update-password")
+  .post(authenticateToken, isAdmin, userController.updatePassword);
 
 router
   .route("/")
