@@ -32,16 +32,17 @@ const quizSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course", // Reference to the Class model
     },
+    duration: {
+      type: Number, // Duration in minutes
+      required: true,
+    },
     description: { type: String },
     questions: [questionSchema],
     date: {
       type: Date,
       required: true,
     },
-    // i couldve written duration but the front end is already set to this attr
-    endDate: {
-      type: Date,
-    },
+
     totalMarks: {
       type: Number,
       default: 100,
