@@ -1,4 +1,6 @@
 const Quiz = require("../models/quiz.js");
+const Course = require("../models/course.js");
+
 const apiFeatures = require("../utils/apiFeatures");
 //TODO fix and test the new logic of quizzes
 const getAllQuizzes = async (req, res) => {
@@ -10,8 +12,7 @@ const getAllQuizzes = async (req, res) => {
           path: "questions",
           populate: { path: "choices" },
         })
-        .populate("classId") // Populate the Class document
-        .populate("courseId"), 
+        .populate("courseId"),
       req.query
     )
       .filter()
@@ -63,6 +64,22 @@ const getQuizById = async (req, res) => {
 // Create a new quiz
 const createQuiz = async (req, res) => {
   try {
+    if (req.user.role === "Teacher") {
+      const teacherId = req.user.profileId;
+      const courseId = req.body.courseId;
+
+      if (!courseId) {
+        return res
+          .status(400)
+          .json({ message: "courseId is required for teachers" });
+      }
+
+      const course = await Course.findOne({ _id: courseId, teacherId });
+      if (!course)
+        return res
+          .status(404)
+          .json({ message: "not allowed or Course not found" });
+    }
     const newQuiz = await Quiz.create(req.body);
 
     // Respond with the created quiz
@@ -81,6 +98,33 @@ const createQuiz = async (req, res) => {
 // Update a quiz by ID
 const updateQuiz = async (req, res) => {
   try {
+    const quiz = await Quiz.findById(req.params.id);
+    if (!quiz) {
+      return res.status(404).json({ message: "Quiz not found" });
+    }
+    if (req.user.role === "Teacher") {
+      const teacherId = req.user.profileId;
+      const originalCourse = await Course.findOne({
+        _id: quiz.courseId,
+        teacherId,
+      });
+
+      if (!originalCourse) {
+        return res.status(403).json({ message: "Not allowed" });
+      }
+      if (req.body?.courseId) {
+        const newCourse = await Course.findOne({
+          _id: req.body.courseId,
+          teacherId,
+        });
+        if (!newCourse) {
+          return res
+            .status(403)
+            .json({ message: "Not allowed to move quiz to this course" });
+        }
+      }
+    }
+
     const updatedQuiz = await Quiz.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
@@ -97,30 +141,33 @@ const updateQuiz = async (req, res) => {
 };
 
 // Delete a quiz by ID
-const deactivateQuiz = async (req, res) => {
+const deleteQuiz = async (req, res) => {
   try {
     const quizId = req.params.id;
-    const quiz = await Quiz.findById(quizId);
 
+    const quiz = await Quiz.findById(quizId);
     if (!quiz) {
       return res
         .status(404)
         .json({ status: "fail", message: "Quiz not found" });
     }
-    if (!quiz.active) {
-      return res.status(200).json({
-        status: "success",
-        message: "Quiz is already deactivated",
-      });
+
+    if (req.user.role === "Teacher") {
+      const teacherId = req.user.profileId;
+      const courseId = quiz.courseId;
+
+      const course = await Course.findOne({ _id: courseId, teacherId });
+
+      if (!course) {
+        return res.status(403).json({ message: "Not allowed" });
+      }
     }
 
-    // Soft delete by setting 'active' to false
-    quiz.active = false;
-    await quiz.save();
+    await Quiz.findByIdAndDelete(quizId);
 
     res.status(200).json({
       status: "success",
-      message: "Quiz deactivated successfully",
+      message: "Quiz deleted successfully",
     });
   } catch (error) {
     res.status(400).json({ status: "fail", message: error.message });
@@ -240,7 +287,7 @@ module.exports = {
   getAllQuizzes,
   getQuizById,
   updateQuiz,
-  deactivateQuiz,
+  deleteQuiz,
   getAllQuestions,
   getQuestionById,
   //   updateQuestion,

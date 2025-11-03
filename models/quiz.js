@@ -30,20 +30,7 @@ const quizSchema = new mongoose.Schema(
     title: { type: String, required: true },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Course", // Reference to the Course model
-    },
-    classId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Class", // Reference to the Class model
-    },
-    yearLevel: {
-      type: Number,
-      required: true,
-      enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // Year levels from 1 to 12
-    },
-    duration: {
-      type: Number, // Duration in minutes
-      required: true,
+      ref: "Course", // Reference to the Class model
     },
     description: { type: String },
     questions: [questionSchema],
@@ -51,6 +38,7 @@ const quizSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    // i couldve written duration but the front end is already set to this attr
     endDate: {
       type: Date,
     },

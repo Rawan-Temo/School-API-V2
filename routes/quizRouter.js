@@ -10,17 +10,15 @@ const {
 // Quiz routes
 router
   .route("/")
-  .post(authenticateToken, isAdmin, quizController.createQuiz)
+  .post(authenticateToken, isTeacher, quizController.createQuiz)
   .get(authenticateToken, isStudent, quizController.getAllQuizzes);
 
 router
   .route("/:id")
   .get(authenticateToken, isStudent, quizController.getQuizById)
-  .patch(authenticateToken, isAdmin, quizController.updateQuiz);
+  .patch(authenticateToken, isTeacher, quizController.updateQuiz)
+  .delete(authenticateToken, isTeacher, quizController.deleteQuiz);
 
-router
-  .route("/deactivate/:id")
-  .patch(authenticateToken, isAdmin, quizController.deactivateQuiz);
 // // Question routes
 
 router
