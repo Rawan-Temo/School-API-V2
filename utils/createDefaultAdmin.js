@@ -3,6 +3,7 @@ const User = require("../models/user");
 
 async function createDefaultAdmin() {
   const adminUser = await User.findOne({ role: "Admin" });
+  console.log(adminUser);
   if (!adminUser) {
     const hashedPassword = await bcrypt.hash("Admin@2025", 10);
     const defaultAdmin = new User({
