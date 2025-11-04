@@ -53,8 +53,8 @@ const attachStudentQuery = async (req, res, next) => {
 };
 const attachStudentBody = async (req, res, next) => {
   try {
-    if (req.user.role === "Teacher") {
-      req.body.teacherId = req.user.profileId;
+    if (req.user.role === "Student") {
+      req.body.studentId = req.user.profileId;
     }
 
     return next();
