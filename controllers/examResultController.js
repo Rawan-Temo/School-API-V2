@@ -4,7 +4,7 @@ const createController = require("../utils/createControllers");
 // default controllers for ExamResult model
 
 const examResultController = createController(ExamResult, "examResult", "", [
-  { path: "examId", populate: "courseId" },
+  { path: "examId", select: "title totalmarks", populate: "courseId" },
   { path: "studentId" },
 ]);
 

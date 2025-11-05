@@ -2,6 +2,8 @@ const Quiz = require("../models/quiz.js");
 const Course = require("../models/course.js");
 
 const apiFeatures = require("../utils/apiFeatures");
+const ExamResult = require("../models/examResult.js");
+const { extname } = require("path/win32");
 //TODO fix and test the new logic of quizzes
 const getAllQuizzes = async (req, res) => {
   try {
@@ -21,7 +23,10 @@ const getAllQuizzes = async (req, res) => {
       .paginate();
 
     // Initialize a separate feature for counting quizzes with only filtering
-    const countFeatures = new apiFeatures(Quiz.find(), req.query).filter();
+    const countFeatures = new apiFeatures(
+      Quiz.find().lean(),
+      req.query
+    ).filter();
     // Convert to JSON-safe objects
     // Execute both queries in parallel
     let [quizzes, numberOfQuizzes] = await Promise.all([
@@ -63,7 +68,7 @@ const getAllQuizzes = async (req, res) => {
 // Get a quiz by ID
 const getQuizById = async (req, res) => {
   try {
-    const quiz = await Quiz.findById(req.params.id).populate("courseId");
+    const quiz = await Quiz.findById(req.params.id).populate("courseId").lean();
     if (req.user.role === "Student") {
       quiz.questions?.forEach((q) => {
         if (q.type === "true-false") {
@@ -310,69 +315,106 @@ const getQuestionById = async (req, res) => {
 
 const submitQuiz = async (req, res) => {
   try {
-    // if (!(req.user.role === "Student")) {
-    //   return res
-    //     .status(400)
-    //     .json({
-    //       status: "fail",
-    //       message: "must be a student to submit a Quiz",
-    //     });
-    // }
+    if (req.user.role !== "Student") {
+      return res.status(403).json({
+        status: "fail",
+        message: "Only students can submit a quiz",
+      });
+    }
+
     const { studentAnswers, quizId } = req.body;
     const studentId = req.user.profileId;
 
-    // Populate quiz (use lean for plain JSON; optional)
-    const quiz = await Quiz.findById(quizId).populate("courseId").lean();
+    if (!quizId || !Array.isArray(studentAnswers)) {
+      return res.status(400).json({
+        status: "fail",
+        message: "quizId and studentAnswers are required",
+      });
+    }
 
+    // Fetch quiz
+    const quiz = await Quiz.findById(quizId).populate("courseId").lean();
     if (!quiz) {
       return res
         .status(404)
         .json({ status: "fail", message: "Quiz not found" });
     }
 
-    // Build correct answers list
-    const correctAnswers = [];
-    for (const q of quiz.questions) {
-      if (q.type === "true-false") {
-        correctAnswers.push({
-          questionId: String(q._id),
-          answer: String(q.correctAnswer),
+    // Optional: prevent multiple submissions
+    const existingSubmission = await ExamResult.findOne({
+      examId: quizId,
+      studentId,
+    });
+    if (existingSubmission) {
+      return res.status(400).json({
+        status: "fail",
+        message: "You have already submitted this quiz",
+      });
+    }
+
+    // Validate one answer per question
+    const ids = studentAnswers.map((a) => String(a.questionId));
+    const uniqueIds = new Set(ids);
+    if (ids.length !== uniqueIds.size) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Multiple answers per question are not allowed",
+      });
+    }
+
+    // Validate questionIds
+    const validQuestionIds = new Set(quiz.questions.map((q) => String(q._id)));
+    for (const qId of uniqueIds) {
+      if (!validQuestionIds.has(qId)) {
+        return res.status(400).json({
+          status: "fail",
+          message: "Invalid question submitted",
         });
-      } else {
-        for (const c of q.choices ?? []) {
-          if (c.isCorrect) {
-            correctAnswers.push({
-              questionId: String(q._id),
-              answer: String(c.text),
-            });
-          }
-        }
       }
     }
 
-    // Create studentAnswer lookup map
+    // Build student answer map
     const studentMap = new Map();
-    for (const sa of studentAnswers) {
-      studentMap.set(String(sa.questionId), String(sa.answer));
+    for (const ans of studentAnswers) {
+      studentMap.set(String(ans.questionId), String(ans.answer));
     }
 
     // Count correct answers
-    let correctAnswersCount = 0;
-    for (const ca of correctAnswers) {
-      if (studentMap.get(ca.questionId) === ca.answer) {
-        correctAnswersCount++;
+    let correctCount = 0;
+    for (const q of quiz.questions) {
+      const studentAnswer = studentMap.get(String(q._id));
+      if (studentAnswer == null) continue;
+
+      let correctAnswer;
+      if (q.type === "true-false") {
+        correctAnswer = String(q.correctAnswer);
+      } else {
+        const correctChoice = q.choices?.find((c) => c.isCorrect);
+        if (!correctChoice) continue;
+        correctAnswer = String(correctChoice.text);
       }
+
+      if (studentAnswer === correctAnswer) correctCount++;
     }
 
-    const possibleAnswers = quiz.questions.length;
-    const score = (quiz.totalMarks * correctAnswersCount) / possibleAnswers;
+    const totalQuestions = quiz.questions.length;
+    const score = (quiz.totalMarks * correctCount) / totalQuestions;
+
+    // Store result
+    const examResult = await ExamResult.create({
+      examId: quizId,
+      studentId,
+      score,
+      type: "Quiz",
+    });
 
     res.status(200).json({
       status: "success",
-      data: `quiz submitted successfully with score of ${score} out of ${quiz.totalMarks} `,
+      message: `Quiz submitted successfully. Score: ${score} / ${quiz.totalMarks}`,
+      data: examResult,
     });
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
     res.status(500).json({ status: "fail", message: error.message });
   }
 };
