@@ -42,7 +42,10 @@ const quizSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-
+    endDate: {
+      type: Date,
+      required: true,
+    },
     totalMarks: {
       type: Number,
       default: 100,
