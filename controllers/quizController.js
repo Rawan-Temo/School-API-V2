@@ -307,11 +307,81 @@ const getQuestionById = async (req, res) => {
 //     res.status(400).json({ status: "fail", message: error.message });
 //   }
 // };
+
+const submitQuiz = async (req, res) => {
+  try {
+    // if (!(req.user.role === "Student")) {
+    //   return res
+    //     .status(400)
+    //     .json({
+    //       status: "fail",
+    //       message: "must be a student to submit a Quiz",
+    //     });
+    // }
+    const { studentAnswers, quizId } = req.body;
+    const studentId = req.user.profileId;
+
+    // Populate quiz (use lean for plain JSON; optional)
+    const quiz = await Quiz.findById(quizId).populate("courseId").lean();
+
+    if (!quiz) {
+      return res
+        .status(404)
+        .json({ status: "fail", message: "Quiz not found" });
+    }
+
+    // Build correct answers list
+    const correctAnswers = [];
+    for (const q of quiz.questions) {
+      if (q.type === "true-false") {
+        correctAnswers.push({
+          questionId: String(q._id),
+          answer: String(q.correctAnswer),
+        });
+      } else {
+        for (const c of q.choices ?? []) {
+          if (c.isCorrect) {
+            correctAnswers.push({
+              questionId: String(q._id),
+              answer: String(c.text),
+            });
+          }
+        }
+      }
+    }
+
+    // Create studentAnswer lookup map
+    const studentMap = new Map();
+    for (const sa of studentAnswers) {
+      studentMap.set(String(sa.questionId), String(sa.answer));
+    }
+
+    // Count correct answers
+    let correctAnswersCount = 0;
+    for (const ca of correctAnswers) {
+      if (studentMap.get(ca.questionId) === ca.answer) {
+        correctAnswersCount++;
+      }
+    }
+
+    const possibleAnswers = quiz.questions.length;
+    const score = (quiz.totalMarks * correctAnswersCount) / possibleAnswers;
+
+    res.status(200).json({
+      status: "success",
+      data: `quiz submitted successfully with score of ${score} out of ${quiz.totalMarks} `,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ status: "fail", message: error.message });
+  }
+};
 module.exports = {
   createQuiz,
   getAllQuizzes,
   getQuizById,
   updateQuiz,
+  submitQuiz,
   deleteQuiz,
   getAllQuestions,
   getQuestionById,

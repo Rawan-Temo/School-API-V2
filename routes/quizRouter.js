@@ -14,6 +14,9 @@ router
   .get(authenticateToken, isStudent, quizController.getAllQuizzes);
 
 router
+  .route("/submit")
+  .post(authenticateToken, isStudent, quizController.submitQuiz);
+router
   .route("/:id")
   .get(authenticateToken, isStudent, quizController.getQuizById)
   .patch(authenticateToken, isTeacher, quizController.updateQuiz)
@@ -21,13 +24,13 @@ router
 
 // // Question routes
 
-router
-  .route("/:quizId/questions")
-  .get(authenticateToken, isStudent, quizController.getAllQuestions);
+// router
+//   .route("/:quizId/questions")
+//   .get(authenticateToken, isStudent, quizController.getAllQuestions);
 
-router
-  .route("/:quizId/questions/:questionId")
-  .get(authenticateToken, isStudent, quizController.getQuestionById);
+// router
+//   .route("/:quizId/questions/:questionId")
+//   .get(authenticateToken, isStudent, quizController.getQuestionById);
 //   .patch(quizController.updateQuestion)
 //   .delete(quizController.deleteQuestion);
 
