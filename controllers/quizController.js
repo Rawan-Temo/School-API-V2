@@ -22,20 +22,16 @@ const getAllQuizzes = async (req, res) => {
       .limitFields()
       .paginate();
 
-    // Initialize a separate feature for counting quizzes with only filtering
     const countFeatures = new apiFeatures(
       Quiz.find().lean(),
       req.query
     ).filter();
-    // Convert to JSON-safe objects
-    // Execute both queries in parallel
     let [quizzes, numberOfQuizzes] = await Promise.all([
       features.query, // Get paginated quizzes
       countFeatures.query.countDocuments(), // Count all filtered documents
     ]);
     quizzes = quizzes.map((q) => q.toObject());
 
-    // Mask correct answers for students
     if (req.user.role === "Student") {
       quizzes.forEach((quiz) => {
         quiz.questions?.forEach((q) => {
@@ -332,7 +328,6 @@ const submitQuiz = async (req, res) => {
       });
     }
 
-    // Fetch quiz
     const quiz = await Quiz.findById(quizId).populate("courseId").lean();
     if (!quiz) {
       return res
@@ -340,7 +335,6 @@ const submitQuiz = async (req, res) => {
         .json({ status: "fail", message: "Quiz not found" });
     }
 
-    // Optional: prevent multiple submissions
     const existingSubmission = await ExamResult.findOne({
       examId: quizId,
       studentId,
@@ -349,10 +343,10 @@ const submitQuiz = async (req, res) => {
       return res.status(400).json({
         status: "fail",
         message: "You have already submitted this quiz",
+        examResult: existingSubmission,
       });
     }
 
-    // Validate one answer per question
     const ids = studentAnswers.map((a) => String(a.questionId));
     const uniqueIds = new Set(ids);
     if (ids.length !== uniqueIds.size) {
@@ -362,7 +356,6 @@ const submitQuiz = async (req, res) => {
       });
     }
 
-    // Validate questionIds
     const validQuestionIds = new Set(quiz.questions.map((q) => String(q._id)));
     for (const qId of uniqueIds) {
       if (!validQuestionIds.has(qId)) {
@@ -373,13 +366,11 @@ const submitQuiz = async (req, res) => {
       }
     }
 
-    // Build student answer map
     const studentMap = new Map();
     for (const ans of studentAnswers) {
       studentMap.set(String(ans.questionId), String(ans.answer));
     }
 
-    // Count correct answers
     let correctCount = 0;
     for (const q of quiz.questions) {
       const studentAnswer = studentMap.get(String(q._id));
