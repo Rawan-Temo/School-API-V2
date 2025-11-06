@@ -75,7 +75,16 @@ const createController = (Model, modelName, searchFields, populate = "") => {
   // Get one by ID
   const getOneById = async (req, res) => {
     try {
-      let query = Model.findOne({ _id: req.params.id, ...req.query });
+      let _id = req.params.id;
+      if (modelName === "student" && req.user.role === "Student") {
+        if (_id !== String(req.user.profileId)) {
+          return res.status(403).json({
+            status: "fail",
+            message: "You Think You Are Smart Get Gud",
+          });
+        }
+      }
+      let query = Model.findOne({ _id, ...req.query });
       if (populate) {
         query = query.populate(populate);
       }

@@ -344,6 +344,7 @@ const submitQuiz = async (req, res) => {
         status: "fail",
         message: "You have already submitted this quiz",
         examResult: existingSubmission,
+        note: "You Think You Are Smart Get Gud",
       });
     }
 
@@ -352,7 +353,8 @@ const submitQuiz = async (req, res) => {
     if (ids.length !== uniqueIds.size) {
       return res.status(400).json({
         status: "fail",
-        message: "Multiple answers per question are not allowed",
+        message: "Multiple answers per question are not allowed ",
+        note: "You Think You Are Smart Get Gud",
       });
     }
 
@@ -418,6 +420,4 @@ module.exports = {
   deleteQuiz,
   getAllQuestions,
   getQuestionById,
-  //   updateQuestion,
-  //   deleteQuestion,
 };
