@@ -11,6 +11,18 @@ const createController = (Model, modelName, searchFields, populate = "") => {
     const excludedFields = ["page", "sort", "limit", "fields", "populate"];
     excludedFields.forEach((el) => delete queryObj[el]);
 
+    for (let key in queryObj) {
+      if (/\b(gte|gt|lte|lt)\b/.test(key)) continue;
+
+      if (key.endsWith("_multi")) {
+        const field = key.replace("_multi", "");
+        let values = queryObj[key].split(",");
+        console.log(values);
+        queryObj[field] = { $in: values };
+        delete queryObj[key];
+      }
+    }
+
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
     return JSON.parse(queryStr);

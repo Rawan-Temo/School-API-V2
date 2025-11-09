@@ -5,9 +5,9 @@ const apiFeatures = require("../utils/apiFeatures");
 const ExamResult = require("../models/examResult.js");
 const { extname } = require("path/win32");
 //TODO fix and test the new logic of quizzes
+// DONE
 const getAllQuizzes = async (req, res) => {
   try {
-    // Initialize the API features for filtered, sorted, and paginated quiz data
     const features = new apiFeatures(
       Quiz.find()
         .populate({
