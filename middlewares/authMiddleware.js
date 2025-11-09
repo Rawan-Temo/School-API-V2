@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const Course = require("../models/course");
+const Exam = require("../models/exam");
 
 const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -85,6 +87,98 @@ const attachTeacherBody = async (req, res, next) => {
   }
 };
 
+const createTeacherExamAuth = async (req, res, next) => {
+  try {
+    if (req.user.role === "Teacher") {
+      const teacherId = req.user.profileId;
+      const { courseId } = req.body;
+
+      // verify course exists and teacher belongs to it
+      const course = await Course.findOne({ _id: courseId, teacherId });
+      if (!course) {
+        return res.status(403).json({
+          message: "Course not found or unautherized to create an exam for it ",
+        });
+      }
+    }
+    return next();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const updateTeacherExamAuth = async (req, res, next) => {
+  try {
+    const examId = req.params.id;
+    if (req.user.role === "Teacher") {
+      const teacherId = req.user.profileId;
+      const { courseId } = req.query;
+      let course;
+
+      // find attendance
+      const exam = await Exam.findById(examId);
+      if (!exam) {
+        return res.status(404).json({ message: "exam not found" });
+      }
+
+      if (courseId) {
+        course = await Course.findOne({
+          $or: [{ _id: exam.courseId }, { _id: courseId }],
+          teacherId,
+        });
+      } else {
+        course = await Course.findOne({
+          _id: exam.courseId,
+          teacherId,
+        });
+      }
+      // find its course
+      if (!course) {
+        return res.status(403).json({
+          message: "Course not found or not autherized to add an exam to",
+        });
+      }
+    }
+    return next();
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const deleteTeacherExamAuth = async (req, res, next) => {
+  try {
+    const ids = req.body.ids;
+
+    if (req.user.role === "Teacher") {
+      const teacherId = req.user.profileId;
+
+      // Get exams to delete
+      const exams = await Exam.find({ _id: { $in: ids } });
+
+      if (!exams.length) {
+        return res.status(404).json({ message: "Exams not found" });
+      }
+
+      // Get courseIds from exams
+      const courseIds = [...new Set(exams.map((e) => e.courseId))];
+
+      // Check teacher owns all courseIds
+      const courses = await Course.find({
+        _id: { $in: courseIds },
+        teacherId,
+      });
+
+      if (courses.length !== courseIds.length) {
+        return res.status(403).json({
+          message: "Not authorized to delete one or more of these exams",
+        });
+      }
+    }
+
+    return next();
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   authenticateToken,
   isAdmin,
@@ -94,4 +188,7 @@ module.exports = {
   attachStudentBody,
   attachTeacherQuery,
   attachTeacherBody,
+  createTeacherExamAuth,
+  updateTeacherExamAuth,
+  deleteTeacherExamAuth,
 };

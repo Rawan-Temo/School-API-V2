@@ -29,6 +29,8 @@ const updateAttendance = async (req, res) => {
     const attendanceId = req.params.id;
     if (req.user.role === "Teacher") {
       const teacherId = req.user.profileId;
+      const { courseId } = req.query;
+      let course;
 
       // find attendance
       const attendance = await Attendance.findById(attendanceId);
@@ -36,8 +38,18 @@ const updateAttendance = async (req, res) => {
         return res.status(404).json({ message: "Attendance not found" });
       }
 
+      if (courseId) {
+        course = await Course.findOne({
+          $or: [{ _id: attendance.courseId }, { _id: courseId }],
+          teacherId,
+        });
+      } else {
+        course = await Course.findOne({
+          _id: attendance.courseId,
+          teacherId,
+        });
+      }
       // find its course
-      const course = await Course.findById(attendance.courseId);
       if (!course) {
         return res.status(404).json({ message: "Course not found" });
       }

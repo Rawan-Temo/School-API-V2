@@ -1,3 +1,4 @@
+const Course = require("../models/course");
 const Exam = require("../models/exam");
 const createController = require("../utils/createControllers");
 
@@ -15,6 +16,7 @@ const countData = async (req, res) => {
     res.status(400).json({ status: "fail", message: error.message });
   }
 };
+
 module.exports = {
   ...examController,
   countData,
