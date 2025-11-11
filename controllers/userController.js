@@ -212,6 +212,7 @@ const userProfile = async (req, res) => {
 
 const logout = async (req, res) => {
   const token = req.cookies.refreshToken;
+  console.log(req.cookies);
   if (token) {
     const decoded = jwt.verify(token, REFRESH_SECRET);
     const user = await User.findById(decoded.id);

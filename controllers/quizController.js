@@ -4,9 +4,26 @@ const Course = require("../models/course.js");
 const apiFeatures = require("../utils/apiFeatures");
 const ExamResult = require("../models/examResult.js");
 const { extname } = require("path/win32");
+const { search } = require("../utils/search.js");
 //TODO fix and test the new logic of quizzes
 // DONE
 const getAllQuizzes = async (req, res) => {
+  if (req.query.search) {
+    await search(
+      Quiz,
+      ["title"],
+      [
+        {
+          path: "questions",
+          populate: { path: "choices" },
+        },
+        "courseId",
+      ],
+      req,
+      res
+    );
+    return;
+  }
   try {
     const features = new apiFeatures(
       Quiz.find()

@@ -39,6 +39,7 @@ app.use(
 );
 app.use(morgan(process.env.NODE_ENV === "production" ? "tiny" : "dev"));
 app.use(helmet()); // Security middleware
+
 app.use(
   "/api/",
   rateLimit({
