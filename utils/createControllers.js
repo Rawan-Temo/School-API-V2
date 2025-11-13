@@ -1,4 +1,5 @@
 // utils/controllerFactory.js
+const { validate } = require("../models/teacher");
 const APIFeatures = require("./apiFeatures");
 const { search } = require("./search");
 
@@ -252,6 +253,28 @@ const createController = (Model, modelName, searchFields, populate = "") => {
       res.status(500).json({ message: err.message });
     }
   };
+  const createMany = async (req, res) => {
+    try {
+      const docs = req.body.docs;
+      if (!docs || !Array.isArray(docs) || docs.length === 0) {
+        return res.status(400).json({
+          status: "fail",
+          message: "Invalid input: 'docs' must be a non-empty array.",
+        });
+      }
+      const newDocs = await Model.insertMany(docs, {
+        ordered: false,
+        validateBeforeSave: true,
+      });
+      res.status(201).json({
+        status: "success",
+        results: newDocs.length,
+        data: newDocs,
+      });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  };
 
   return {
     getAll,
@@ -262,6 +285,7 @@ const createController = (Model, modelName, searchFields, populate = "") => {
     deleteOne,
     deactivateMany,
     deleteMany,
+    createMany,
   };
 };
 

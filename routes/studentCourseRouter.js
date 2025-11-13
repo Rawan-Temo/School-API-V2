@@ -25,6 +25,10 @@ router
   .patch(authenticateToken, isAdmin, studentCourseController.deactivateMany);
 
 router
+  .route("/create-many")
+  .patch(authenticateToken, isAdmin, studentCourseController.createMany);
+
+router
   .route("/delete-many")
   .patch(authenticateToken, isAdmin, studentCourseController.deleteMany);
 router
