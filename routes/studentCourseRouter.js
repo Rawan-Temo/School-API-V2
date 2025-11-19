@@ -26,7 +26,7 @@ router
 
 router
   .route("/create-many")
-  .patch(authenticateToken, isAdmin, studentCourseController.createMany);
+  .post(authenticateToken, isAdmin, studentCourseController.createMany);
 
 router
   .route("/delete-many")
